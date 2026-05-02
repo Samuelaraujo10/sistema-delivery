@@ -1,0 +1,98 @@
+.modifier-group {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.modifier-group-header {
+  margin-bottom: 16px;
+}
+
+.modifier-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.modifier-group-title h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.badge-required {
+  background: #6C63FF;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.modifier-group-desc {
+  font-size: 0.8rem;
+  color: #94A3B8;
+}
+
+.modifier-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modifier-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modifier-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modifier-option.selected {
+  background: rgba(108, 99, 255, 0.08);
+  border-color: rgba(108, 99, 255, 0.3);
+}
+
+.modifier-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.option-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.option-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.option-price {
+  font-size: 0.8rem;
+  color: #6C63FF;
+  font-weight: 600;
+}
+
+.option-check {
+  color: #6C63FF;
+}
+
+.circle-placeholder {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}

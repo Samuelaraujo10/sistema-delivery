@@ -1,0 +1,49 @@
+/* Açaí Builder Theme */
+
+.acai-theme {
+  --primary: #7C3AED;
+  --primary-hover: #6D28D9;
+}
+
+.acai-text-gradient {
+  background: linear-gradient(135deg, #7C3AED, #EC4899, #F59E0B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.acai-gradient {
+  background: linear-gradient(180deg, rgba(124,58,237,0.1) 0%, transparent 100%) !important;
+}
+
+.acai-badge {
+  background: rgba(124,58,237,0.12) !important;
+  color: #7C3AED !important;
+  border-color: rgba(124,58,237,0.25) !important;
+}
+
+.acai-btn {
+  background: linear-gradient(135deg, #7C3AED, #6D28D9) !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(124,58,237,0.39) !important;
+}
+
+.acai-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124,58,237,0.23) !important;
+}
+
+.pb-summary-group {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pb-summary-group .pb-summary-cat {
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+/* Reusing core PastaBuilder styles but with some overrides if needed */
+/* Since AcaiBuilder uses the same class names, it will look consistent */

@@ -1,0 +1,123 @@
+.product-detail-modal {
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  max-width: 500px !important;
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.modal-header-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-body {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.product-main-info h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.product-main-info p {
+  color: #94A3B8;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.base-price {
+  font-weight: 600;
+  color: #6C63FF;
+}
+
+.modifiers-section {
+  margin-top: 32px;
+}
+
+.quantity-selector {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+}
+
+.qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.qty-controls button {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-weight: 700;
+}
+
+.modal-footer {
+  padding: 24px;
+  background: #1A1A24;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.add-to-cart-big {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #6C63FF;
+  color: white;
+  border-radius: 16px;
+  font-weight: 600;
+  box-shadow: 0 8px 25px rgba(108, 99, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.add-to-cart-big:hover {
+  background: #5b54e0;
+  transform: translateY(-2px);
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.total-price {
+  font-weight: 700;
+}

@@ -1,0 +1,33 @@
+/* Pizza Builder Theme */
+
+.pizza-theme {
+  --primary: #EF4444;
+  --primary-hover: #DC2626;
+}
+
+.pizza-text-gradient {
+  background: linear-gradient(135deg, #EF4444, #F59E0B, #10B981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pizza-gradient {
+  background: linear-gradient(180deg, rgba(239,68,68,0.1) 0%, transparent 100%) !important;
+}
+
+.pizza-btn {
+  background: linear-gradient(135deg, #EF4444, #DC2626) !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(239,68,68,0.39) !important;
+}
+
+.pizza-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239,68,68,0.23) !important;
+}
+
+.pizza-option.selected {
+  border-color: #EF4444 !important;
+  background: rgba(239,68,68,0.05) !important;
+}
