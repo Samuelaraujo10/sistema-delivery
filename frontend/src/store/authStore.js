@@ -11,6 +11,6 @@ export const useAuthStore = create(
       logout: () => set({ user: null, token: null }),
       updateUser: (user) => set({ user }),
     }),
-    { name: 'delivery-auth' }
+    { name: 'delivery-auth', getStorage: () => sessionStorage }
   )
 );

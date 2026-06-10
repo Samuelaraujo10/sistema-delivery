@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
@@ -11,8 +12,28 @@ import PastaBuilder from './pages/PastaBuilder';
 import AcaiBuilder from './pages/AcaiBuilder';
 import PizzaBuilder from './pages/PizzaBuilder';
 import AdminDashboard from './pages/AdminDashboard';
+import OrdersPage from './pages/OrdersPage';
+import ProfilePage from './pages/ProfilePage';
+import { useAuthStore } from './store/authStore';
+import { authAPI } from './services/api';
 
 export default function App() {
+  const { token, updateUser } = useAuthStore();
+
+  useEffect(() => {
+    const syncUser = async () => {
+      if (token) {
+        try {
+          const { data } = await authAPI.me();
+          updateUser(data.data);
+        } catch (err) {
+          console.error('Erro ao sincronizar dados do usuário:', err);
+        }
+      }
+    };
+    syncUser();
+  }, [token, updateUser]);
+
   return (
     <BrowserRouter>
       <Toaster
@@ -42,6 +63,8 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/order/:id" element={<OrderTrackingPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/builder/pasta/:slug" element={<PastaBuilder />} />
         <Route path="/builder/acai/:slug" element={<AcaiBuilder />} />
         <Route path="/builder/pizza/:slug" element={<PizzaBuilder />} />

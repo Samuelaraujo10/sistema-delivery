@@ -1,5 +1,5 @@
 /* ==========================================
-   DELIVERY APP - Global Styles
+   CGDELIVERY - Global Styles
    Design System: Dark Mode + Vibrant Colors
    ========================================== */
 
@@ -27,8 +27,8 @@
   --border-hover: rgba(255,255,255,0.15);
 
   --text: #F0F0F5;
-  --text-muted: #8888AA;
-  --text-subtle: #555570;
+  --text-muted: #A5A5C8;
+  --text-subtle: #8282A8;
 
   --radius-sm: 8px;
   --radius: 12px;
@@ -71,6 +71,30 @@ input, textarea, select {
   outline: none;
 }
 
+select {
+  background-color: var(--bg-elevated) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+
+select:hover {
+  border-color: var(--border-hover) !important;
+}
+
+select:focus {
+  border-color: var(--primary) !important;
+}
+
+option {
+  background-color: #1a1a24 !important; /* matches var(--bg-elevated) */
+  color: #f0f0f5 !important; /* matches var(--text) */
+  padding: 10px;
+}
+
 img {
   max-width: 100%;
   display: block;
@@ -108,6 +132,10 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 /* ==========================================
    BUTTONS
    ========================================== */
+.input-file {
+  display: none;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -141,6 +169,34 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   background: var(--border);
   border-color: var(--border-hover);
 }
+
+.btn-upload {
+  background: linear-gradient(135deg, #6C63FF, #FF6B35);
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.6);
+  backdrop-filter: blur(6px);
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: var(--transition);
+  font-weight: 700;
+  text-transform: uppercase;
+  text-shadow: 0 0 2px rgba(0,0,0,0.6);
+}
+.btn-upload:hover {
+  background: linear-gradient(135deg, #FF6B35, #6C63FF);
+  border-color: rgba(255,255,255,0.9);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.btn-upload:active { transform: translateY(0); }
+.btn-save {
+  min-width: 140px; /* slightly larger */
+  align-self: flex-start;
+}
+
 
 .btn-sm {
   padding: 8px 16px;

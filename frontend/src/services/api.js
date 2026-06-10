@@ -6,7 +6,7 @@ const api = axios.create({
 
 // Interceptor para token
 api.interceptors.request.use((config) => {
-  const auth = JSON.parse(localStorage.getItem('delivery-auth') || '{}');
+  const auth = JSON.parse(sessionStorage.getItem('delivery-auth') || '{}');
   const token = auth?.state?.token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
   if (!(config.data instanceof FormData)) {
@@ -22,7 +22,16 @@ api.interceptors.response.use(
     const message = error.response?.data?.message || 'Erro inesperado no servidor';
     const errors = error.response?.data?.errors;
 
-    if (error.response?.status !== 401) { // 401 é tratado no login/auth
+    if (error.response?.status === 401) {
+      // Token expirado ou inválido: deslogar e redirecionar
+      import('../store/authStore').then(({ useAuthStore }) => {
+        useAuthStore.getState().logout();
+      });
+      import('react-hot-toast').then(({ toast }) => {
+        toast.error('Sessão expirada. Faça login novamente.');
+      });
+      window.location.href = '/login';
+    } else {
       import('react-hot-toast').then(({ toast }) => {
         toast.error(message);
         if (errors) {
@@ -42,7 +51,9 @@ export const establishmentsAPI = {
   create: (data) => api.post('/establishments', data),
   update: (id, data) => api.put(`/establishments/${id}`, data),
   delete: (id) => api.delete(`/establishments/${id}`),
+  getOrders: (id) => api.get('/orders', { params: { establishmentId: id } }),
 };
+
 
 export const productsAPI = {
   list: (params) => api.get('/products', { params }),
@@ -57,6 +68,8 @@ export const categoriesAPI = {
   list: (params) => api.get('/categories', { params }),
   create: (data) => api.post('/categories', data),
   update: (id, data) => api.put(`/categories/${id}`, data),
+  // Delete a category (soft delete)
+  delete: (id) => api.delete(`/categories/${id}`),
 };
 
 export const ordersAPI = {
@@ -65,12 +78,14 @@ export const ordersAPI = {
   create: (data) => api.post('/orders', data),
   updateStatus: (id, status) => api.patch(`/orders/${id}/status`, { status }),
   userOrders: (userId) => api.get(`/orders/user/${userId}`),
+  notifyPix: (id) => api.post(`/orders/${id}/notify-pix`),
 };
 
 export const authAPI = {
   login: (data) => api.post('/auth/login', data),
   register: (data) => api.post('/auth/register', data),
   me: () => api.get('/auth/me'),
+  updateProfile: (data) => api.put('/auth/profile', data),
 };
 
 export default api;
