@@ -54,7 +54,7 @@ const Product = sequelize.define('Product', {
   },
   categoryId: {
     type: DataTypes.UUID,
-    allowNull: false,
+    allowNull: true,
     field: 'category_id',
   },
   establishmentId: {
@@ -65,6 +65,17 @@ const Product = sequelize.define('Product', {
 }, {
   tableName: 'products',
   underscored: true,
+  indexes: [
+    {
+      fields: ['establishment_id']
+    },
+    {
+      fields: ['category_id']
+    },
+    {
+      fields: ['available']
+    }
+  ]
 });
 
 module.exports = Product;

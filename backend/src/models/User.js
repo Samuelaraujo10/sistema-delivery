@@ -41,6 +41,10 @@ const User = sequelize.define('User', {
     field: 'establishment_id',
     allowNull: true,
   },
+  address: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
 }, {
   tableName: 'users',
   underscored: true,

@@ -47,6 +47,13 @@ const Establishment = sequelize.define('Establishment', {
   phone: {
     type: DataTypes.STRING,
   },
+  whatsapp: {
+    type: DataTypes.STRING,
+  },
+  pixKey: {
+    type: DataTypes.STRING,
+    field: 'pix_key',
+  },
   deliveryFee: {
     type: DataTypes.DECIMAL(10, 2),
     defaultValue: 0,
@@ -71,6 +78,11 @@ const Establishment = sequelize.define('Establishment', {
     defaultValue: true,
     field: 'is_open',
   },
+  hasBuilder: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+    field: 'has_builder',
+  },
   active: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
@@ -78,6 +90,15 @@ const Establishment = sequelize.define('Establishment', {
 }, {
   tableName: 'establishments',
   underscored: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['slug']
+    },
+    {
+      fields: ['active']
+    }
+  ]
 });
 
 module.exports = Establishment;

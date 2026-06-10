@@ -59,6 +59,14 @@ const Order = sequelize.define('Order', {
       order.orderNumber = `#${num}`;
     },
   },
+  indexes: [
+    {
+      fields: ['establishment_id']
+    },
+    {
+      fields: ['user_id']
+    }
+  ]
 });
 
 module.exports = Order;

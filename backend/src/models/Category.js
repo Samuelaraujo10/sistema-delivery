@@ -33,6 +33,11 @@ const Category = sequelize.define('Category', {
 }, {
   tableName: 'categories',
   underscored: true,
+  indexes: [
+    {
+      fields: ['establishment_id']
+    }
+  ]
 });
 
 module.exports = Category;
