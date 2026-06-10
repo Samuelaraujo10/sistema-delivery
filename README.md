@@ -1,6 +1,6 @@
 # Sistema de Delivery Multi-Lojas 🍔🛵
 
-Bem-vindo ao **Sistema de Delivery**, uma plataforma full-stack moderna projetada para conectar clientes a diversos estabelecimentos gastronômicos com suporte a criação de cardápios dinâmicos, montadores de pratos e gestão de pedidos em tempo real.
+Bem-vindo ao **CG Delivery**, uma plataforma full-stack moderna projetada para conectar clientes a diversos estabelecimentos gastronômicos com suporte a criação de cardápios dinâmicos, montadores de pratos e gestão de pedidos em tempo real.
 
 ## 🚀 Como o Projeto Evoluiu (Roadmap de Features)
 
