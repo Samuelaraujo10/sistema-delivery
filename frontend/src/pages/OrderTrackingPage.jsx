@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle, Clock, ChefHat, Bike, Package, XCircle } from 'lucide-react';
+import { CheckCircle, Clock, ChefHat, Bike, Package, XCircle, MessageCircle, Smartphone } from 'lucide-react';
 import { ordersAPI } from '../services/api';
+import { QRCodeSVG } from 'qrcode.react';
 import './OrderTrackingPage.css';
+import { generatePixPayload } from '../utils/pix';
 
 const STATUS_STEPS = [
   { key: 'pending', label: 'Pedido recebido', icon: Package, color: '#6C63FF' },
@@ -17,6 +20,25 @@ export default function OrderTrackingPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const pixPayload = order && order.paymentMethod === 'pix' && order.establishment?.pixKey
+    ? generatePixPayload({
+        key: order.establishment.pixKey,
+        merchantName: order.establishment.name || 'Loja',
+        merchantCity: order.establishment.address || 'São Paulo',
+        amount: order.total,
+        txid: `PEDIDO${order.orderNumber || order.id.slice(-4)}`
+      })
+    : '';
+
+  const handleCopyPix = () => {
+    if (pixPayload) {
+      navigator.clipboard.writeText(pixPayload);
+      toast.success('Código Pix Copia e Cola copiado!');
+    } else {
+      toast.error('Chave Pix não configurada pelo estabelecimento.');
+    }
+  };
+
   useEffect(() => {
     const fetchOrder = async () => {
       try {
@@ -30,9 +52,49 @@ export default function OrderTrackingPage() {
     };
 
     fetchOrder();
-    const interval = setInterval(fetchOrder, 10000); // Atualiza a cada 10s
-    return () => clearInterval(interval);
+
+    // Conectando ao fluxo Server-Sent Events (SSE)
+    const auth = JSON.parse(sessionStorage.getItem('delivery-auth') || '{}');
+    const token = auth?.state?.token;
+    const eventSource = new EventSource(`/api/orders/events?token=${token}`);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const updatedOrder = JSON.parse(event.data);
+        if (updatedOrder.id === id) {
+          setOrder(updatedOrder);
+
+          const statusMap = {
+            confirmed: 'Confirmado e aceito! 🍳',
+            preparing: 'Em preparo na cozinha! 👨‍🍳',
+            delivering: 'Saiu para entrega! 🛵',
+            delivered: 'Entregue! Bom apetite! 🎉',
+            cancelled: 'Pedido cancelado ou recusado. ❌'
+          };
+          toast(statusMap[updatedOrder.status] || `Status atualizado: ${updatedOrder.status}`, {
+            icon: '🔔',
+            duration: 4000
+          });
+        }
+      } catch (err) {
+        console.error('Falha ao processar evento SSE:', err);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      eventSource.close();
+    };
+
+    // Mantemos um polling de segurança com intervalo maior caso ocorra alguma queda no SSE
+    const interval = setInterval(fetchOrder, 20000);
+
+    return () => {
+      eventSource.close();
+      clearInterval(interval);
+    };
   }, [id]);
+
+
 
   if (loading) {
     return (
@@ -60,6 +122,23 @@ export default function OrderTrackingPage() {
 
   const currentStatusIndex = STATUS_STEPS.findIndex(s => s.key === order.status);
   const isCancelled = order.status === 'cancelled';
+
+  const getWhatsAppLink = () => {
+    const contactPhone = order?.establishment?.whatsapp || order?.establishment?.phone;
+    if (!contactPhone) return '#';
+    const phone = contactPhone.replace(/\D/g, ''); // Keep only numbers
+    // Adiciona código do país se não tiver (assumindo 55 para BR)
+    const formattedPhone = phone.startsWith('55') ? phone : `55${phone}`;
+    const message = encodeURIComponent(`Olá! Sou o cliente do pedido #${order.orderNumber}. Gostaria de falar sobre o meu pedido.`);
+    return `https://wa.me/${formattedPhone}?text=${message}`;
+  };
+
+  const formatPhone = (raw) => {
+    if (!raw) return '';
+    const digits = raw.replace(/\D/g, '');
+    return digits.startsWith('55') ? digits : `55${digits}`;
+  };
+
 
   return (
     <div className="page">
@@ -120,6 +199,60 @@ export default function OrderTrackingPage() {
                     : `Estimativa: ${order.establishment?.deliveryTime || 40} minutos`}
                 </span>
               </div>
+
+              <div style={{ marginTop: '16px' }}>
+                <a 
+                  href={getWhatsAppLink()} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="btn" 
+                  style={{ width: '100%', justifyContent: 'center', background: '#25D366', color: 'white', display: 'flex', gap: '8px', border: 'none' }}
+                >
+                  <MessageCircle size={18} />
+                  Fale com o Restaurante no WhatsApp
+                </a>
+              </div>
+
+              {order.paymentMethod === 'pix' && (
+                <div className="pix-box fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+                  <div className="pix-box-header">
+                    <Smartphone size={20} className="pix-icon" />
+                    <h3>Pagamento via Pix</h3>
+                  </div>
+                  <div className="pix-box-body">
+                    <p>
+                      Para que seu pedido seja preparado, realize o pagamento no valor de: 
+                      <strong className="pix-value"> R$ {parseFloat(order.total).toFixed(2)}</strong>.
+                    </p>
+                    
+                                        {pixPayload ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '20px 0', gap: '12px' }}>
+                        <QRCodeSVG
+                          value={pixPayload}
+                          size={180}
+                          level="M"
+                          includeMargin={true}
+                          style={{ border: '12px solid white', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleCopyPix}
+                          className="btn btn-ghost"
+                          style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--accent)', color: 'var(--accent)', marginTop: '8px' }}
+                        >
+                          Copiar Código Copia e Cola
+                        </button>
+                      </div>
+                    ) : (
+                      <p style={{ color: 'var(--danger)', fontSize: '0.85rem', margin: '10px 0' }}>
+                        ⚠️ Chave Pix não cadastrada por este estabelecimento.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+
             </>
           )}
         </div>

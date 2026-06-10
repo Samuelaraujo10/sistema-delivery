@@ -11,6 +11,8 @@
   border-radius: var(--radius-xl);
   padding: 32px;
   animation: fadeIn 0.5s ease;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
 }
 
 .tracking-header {
@@ -247,3 +249,69 @@
     position: static;
   }
 }
+
+/* Pix Payment Box */
+.pix-box {
+  margin-top: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+}
+
+.pix-box-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.pix-icon {
+  color: var(--accent);
+}
+
+.pix-box-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pix-box-body p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.pix-value {
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+
+.pix-instructions {
+  font-size: 0.85rem !important;
+  color: var(--text-subtle) !important;
+}
+
+.pix-wa-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  background: linear-gradient(135deg, #25D366, #128C7E) !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.25) !important;
+  color: white !important;
+}
+
+.pix-wa-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4) !important;
+}
+

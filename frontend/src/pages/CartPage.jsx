@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Minus, Plus, Trash2, ArrowLeft, MapPin, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
@@ -9,8 +9,8 @@ import './CartPage.css';
 
 const PAYMENT_METHODS = [
   { key: 'pix', label: 'Pix', icon: Smartphone },
-  { key: 'credit_card', label: 'Cartão de Crédito', icon: CreditCard },
-  { key: 'debit_card', label: 'Cartão de Débito', icon: CreditCard },
+  { key: 'credit_card', label: 'Cartão de Crédito (na entrega)', icon: CreditCard },
+  { key: 'debit_card', label: 'Cartão de Débito (na entrega)', icon: CreditCard },
   { key: 'cash', label: 'Dinheiro', icon: Banknote },
 ];
 
@@ -18,10 +18,42 @@ export default function CartPage() {
   const navigate = useNavigate();
   const { items, establishment, updateQuantity, removeItem, clearCart, getTotal } = useCartStore();
   const { user } = useAuthStore();
-  const [address, setAddress] = useState('');
+  const [street, setStreet] = useState('');
+  const [number, setNumber] = useState('');
+  const [neighborhood, setNeighborhood] = useState('');
+  const [complement, setComplement] = useState('');
+  const [city, setCity] = useState('');
+  const [reference, setReference] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('pix');
+  const [changeFor, setChangeFor] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user && user.role === 'admin') {
+      toast.error('Administradores não podem realizar compras.');
+      navigate(user.establishmentId ? `/store/${user.establishment?.slug || ''}` : '/admin');
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (user?.address) {
+      try {
+        const addr = typeof user.address === 'string' ? JSON.parse(user.address) : user.address;
+        if (addr) {
+          setStreet(addr.street || '');
+          setNumber(addr.number || '');
+          setNeighborhood(addr.neighborhood || '');
+          setComplement(addr.complement || '');
+          setCity(addr.city || '');
+          setReference(addr.reference || '');
+        }
+      } catch (e) {
+        // Fallback for plain string formats
+        setStreet(user.address);
+      }
+    }
+  }, [user]);
 
   const { subtotal, deliveryFee, total } = getTotal();
 
@@ -48,8 +80,20 @@ export default function CartPage() {
       return;
     }
 
-    if (!address.trim()) {
-      toast.error('Informe o endereço de entrega');
+    if (!street.trim()) {
+      toast.error('Informe a rua do endereço de entrega');
+      return;
+    }
+    if (!number.trim()) {
+      toast.error('Informe o número do endereço de entrega');
+      return;
+    }
+    if (!neighborhood.trim()) {
+      toast.error('Informe o bairro do endereço de entrega');
+      return;
+    }
+    if (!city.trim()) {
+      toast.error('Informe a cidade do endereço de entrega');
       return;
     }
 
@@ -60,35 +104,73 @@ export default function CartPage() {
       items.forEach(item => {
         if (item.isCustomPasta && item.pastaSelections) {
           const { massa, molho, proteina, toppings } = item.pastaSelections;
-          flattenedItems.push({ productId: massa.id, quantity: item.quantity, notes: `Massa do combo: ${item.name}` });
-          flattenedItems.push({ productId: molho.id, quantity: item.quantity });
-          flattenedItems.push({ productId: proteina.id, quantity: item.quantity });
-          toppings.forEach(t => { flattenedItems.push({ productId: t.id, quantity: item.quantity }); });
+          const comboId = `pasta-${Date.now()}-${Math.random()}`;
+          flattenedItems.push({ productId: massa.id, quantity: item.quantity, notes: `Massa do combo: ${item.name}`, comboId, comboType: 'pasta' });
+          flattenedItems.push({ productId: molho.id, quantity: item.quantity, comboId, comboType: 'pasta' });
+          flattenedItems.push({ productId: proteina.id, quantity: item.quantity, comboId, comboType: 'pasta' });
+          toppings.forEach(t => { flattenedItems.push({ productId: t.id, quantity: item.quantity, comboId, comboType: 'pasta' }); });
         } else if (item.isCustomAcai && item.acaiSelections) {
           const { tamanho, creme, fruta, complemento, calda } = item.acaiSelections;
-          flattenedItems.push({ productId: tamanho.id, quantity: item.quantity, notes: `Açaí customizado: ${item.name}` });
+          const comboId = `acai-${Date.now()}-${Math.random()}`;
+          flattenedItems.push({ productId: tamanho.id, quantity: item.quantity, notes: `Açaí customizado: ${item.name}`, comboId, comboType: 'acai' });
           [creme, fruta, complemento, calda].forEach(arr => {
-            arr.forEach(i => { flattenedItems.push({ productId: i.id, quantity: item.quantity }); });
+            arr.forEach(i => { flattenedItems.push({ productId: i.id, quantity: item.quantity, comboId, comboType: 'acai' }); });
           });
         } else if (item.isCustomPizza && item.pizzaSelections) {
           const { tamanho, sabor, borda } = item.pizzaSelections;
-          flattenedItems.push({ productId: tamanho.id, quantity: item.quantity, notes: `Pizza customizada: ${item.name}` });
-          flattenedItems.push({ productId: sabor.id, quantity: item.quantity });
-          flattenedItems.push({ productId: borda.id, quantity: item.quantity });
+          const comboId = `pizza-${Date.now()}-${Math.random()}`;
+          flattenedItems.push({ productId: tamanho.id, quantity: item.quantity, notes: `Pizza customizada: ${item.name}`, comboId, comboType: 'pizza' });
+          sabor.forEach(s => {
+            flattenedItems.push({ productId: s.id, quantity: item.quantity, comboId, comboType: 'pizza' });
+          });
+          if (borda && borda.id) {
+            flattenedItems.push({ productId: borda.id, quantity: item.quantity, comboId, comboType: 'pizza' });
+          }
         } else {
           flattenedItems.push({ productId: item.id, quantity: item.quantity, notes: item.notes });
         }
       });
 
+      const finalNotes = paymentMethod === 'cash' && changeFor 
+        ? `${notes}\n[Troco para R$ ${changeFor}]`.trim() 
+        : notes;
+  
+      const addressObj = {
+        street: street.trim(),
+        number: number.trim(),
+        neighborhood: neighborhood.trim(),
+        complement: complement.trim(),
+        city: city.trim(),
+        reference: reference.trim()
+      };
+
+      const fullAddress = [
+        `Rua: ${addressObj.street}`,
+        `Nº: ${addressObj.number}`,
+        `Bairro: ${addressObj.neighborhood}`,
+        addressObj.complement ? `Compl: ${addressObj.complement}` : '',
+        `Cidade: ${addressObj.city}`,
+        addressObj.reference ? `Ref: ${addressObj.reference}` : ''
+      ].filter(Boolean).join(', ');
+  
       const orderData = {
         establishmentId: establishment.id,
         items: flattenedItems,
         paymentMethod,
-        deliveryAddress: address,
-        notes,
+        deliveryAddress: fullAddress,
+        userAddress: JSON.stringify(addressObj),
+        notes: finalNotes,
       };
 
       const { data } = await ordersAPI.create(orderData);
+      
+      if (user) {
+        useAuthStore.getState().updateUser({
+          ...user,
+          address: JSON.stringify(addressObj)
+        });
+      }
+
       clearCart();
       toast.success('Pedido realizado com sucesso! 🎉');
       navigate(`/order/${data.data.id}`);
@@ -119,11 +201,13 @@ export default function CartPage() {
 
           <div className="cart-items">
             {items.map(item => (
-              <div key={item.id} className="cart-item fade-in">
+              <div key={item.cartId} className="cart-item fade-in">
                 <div className="cart-item-emoji">
                   {establishment?.type === 'acai' ? '🍇' :
                    establishment?.type === 'pizza' ? '🍕' :
-                   establishment?.type === 'burger' ? '🍔' : '🍽️'}
+                   establishment?.type === 'burger' ? '🍔' :
+                   establishment?.type === 'bebida' ? '🥤' :
+                   establishment?.type === 'massa' ? '🍝' : '🍽️'} 
                 </div>
                 <div className="cart-item-info">
                   <h4>{item.name}</h4>
@@ -156,18 +240,18 @@ export default function CartPage() {
                 </div>
                 <div className="cart-item-controls">
                   <div className="qty-control">
-                    <button className="qty-btn" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
+                    <button className="qty-btn" onClick={() => updateQuantity(item.cartId, item.quantity - 1)}>
                       <Minus size={13} />
                     </button>
                     <span className="qty-value">{item.quantity}</span>
-                    <button className="qty-btn" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
+                    <button className="qty-btn" onClick={() => updateQuantity(item.cartId, item.quantity + 1)}>
                       <Plus size={13} />
                     </button>
                   </div>
                   <span className="cart-item-total">
                     R$ {(parseFloat(item.price) * item.quantity).toFixed(2)}
                   </span>
-                  <button className="remove-btn" onClick={() => removeItem(item.id)}>
+                  <button className="remove-btn" onClick={() => removeItem(item.cartId)}>
                     <Trash2 size={15} />
                   </button>
                 </div>
@@ -184,15 +268,68 @@ export default function CartPage() {
             {/* Delivery Address */}
             <div className="checkout-section">
               <label className="checkout-label">
-                <MapPin size={15} /> Endereço de entrega *
+                <MapPin size={15} /> Endereço de entrega
               </label>
-              <textarea
-                className="input checkout-textarea"
-                placeholder="Rua, número, bairro, complemento..."
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                rows={3}
-              />
+              <div className="address-grid">
+                <div className="col-3">
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Rua / Avenida *"
+                    value={street}
+                    onChange={(e) => setStreet(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="col-1">
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Nº *"
+                    value={number}
+                    onChange={(e) => setNumber(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="col-2">
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Bairro *"
+                    value={neighborhood}
+                    onChange={(e) => setNeighborhood(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="col-2">
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Complemento"
+                    value={complement}
+                    onChange={(e) => setComplement(e.target.value)}
+                  />
+                </div>
+                <div className="col-2">
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Cidade *"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="col-2">
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Ponto de referência"
+                    value={reference}
+                    onChange={(e) => setReference(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Payment */}
@@ -210,11 +347,24 @@ export default function CartPage() {
                       onClick={() => setPaymentMethod(pm.key)}
                     >
                       <Icon size={16} />
-                      {pm.label}
+                      <span>{pm.label}</span>
                     </button>
                   );
                 })}
               </div>
+
+              {paymentMethod === 'cash' && (
+                <div className="checkout-cash-change fade-in" style={{ marginTop: '12px' }}>
+                  <label className="checkout-label">Troco para quanto? (Deixe em branco se não precisar)</label>
+                  <input
+                    type="number"
+                    className="input"
+                    placeholder="Ex: 50"
+                    value={changeFor}
+                    onChange={(e) => setChangeFor(e.target.value)}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Notes */}
