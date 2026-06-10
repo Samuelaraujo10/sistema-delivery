@@ -1,31 +1,52 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCart, User, Zap, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
+import logoImg from '../assets/logo_cgdelivery.png';
 import './Navbar.css';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const timeoutRef = useRef(null);
   const cartCount = useCartStore(s => s.getCount());
   const { user, logout } = useAuthStore();
   const location = useLocation();
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setDropdownOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setDropdownOpen(false);
+    }, 300);
+  };
+
+
 
   return (
     <nav className="navbar">
       <div className="navbar-inner container">
         <Link to="/" className="navbar-logo">
           <div className="navbar-logo-icon">
-            <Zap size={20} fill="currentColor" />
+            <img src={logoImg} className="navbar-logo-img" alt="CG Delivery logo" />
           </div>
-          <span>Delivery<span className="logo-accent">App</span></span>
+          <span>CG<span className="logo-accent">Delivery</span></span>
         </Link>
 
         <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
-          <Link to="/" className={location.pathname === '/' ? 'active' : ''} onClick={() => setMenuOpen(false)}>
-            Início
-          </Link>
-          {user && (
+          {user?.role !== 'admin' && (
+            <Link to="/" className={location.pathname === '/' ? 'active' : ''} onClick={() => setMenuOpen(false)}>
+              Início
+            </Link>
+          )}
+          {user && user.role !== 'admin' && (
             <Link to="/orders" className={location.pathname === '/orders' ? 'active' : ''} onClick={() => setMenuOpen(false)}>
               Pedidos
             </Link>
@@ -33,21 +54,57 @@ export default function Navbar() {
         </div>
 
         <div className="navbar-actions">
-          <Link to="/cart" className="cart-btn">
-            <ShoppingCart size={20} />
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-          </Link>
+          {user?.role !== 'admin' && (
+            <Link to="/cart" className="cart-btn">
+              <ShoppingCart size={20} />
+              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            </Link>
+          )}
 
           {user ? (
-            <div className="user-menu">
-              <button className="btn btn-ghost btn-sm user-btn">
+            <div 
+              className="user-menu" 
+              onMouseEnter={handleMouseEnter} 
+              onMouseLeave={handleMouseLeave}
+            >
+              <button 
+                className="btn btn-ghost btn-sm user-btn"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
                 <User size={16} />
                 <span>{user.name.split(' ')[0]}</span>
+                {user.role === 'admin' && (
+                  <span className="user-role-badge">
+                    {user.establishmentId ? 'Lojista' : 'Admin Geral'}
+                  </span>
+                )}
               </button>
-              <div className="user-dropdown">
-                {user.role === 'admin' && <Link to="/admin">Painel Admin</Link>}
-                <Link to="/orders">Meus Pedidos</Link>
-                <button onClick={logout}>Sair</button>
+              <div className={`user-dropdown ${dropdownOpen ? 'open' : ''}`}>
+                {user.role === 'admin' && (
+                  <div className="user-dropdown-header">
+                    <span className="dropdown-user-role">
+                      {user.establishmentId ? `Lojista (${user.establishment?.name || 'Restaurante'})` : 'Administrador Geral'}
+                    </span>
+                  </div>
+                )}
+                {user.role === 'admin' && (
+                  <Link to="/admin" onClick={() => setDropdownOpen(false)}>
+                    Painel Admin
+                  </Link>
+                )}
+                {!user.establishmentId && (
+                  <Link to="/profile" onClick={() => setDropdownOpen(false)}>
+                    Meus Dados
+                  </Link>
+                )}
+                {user.role !== 'admin' && (
+                  <Link to="/orders" onClick={() => setDropdownOpen(false)}>
+                    Meus Pedidos
+                  </Link>
+                )}
+                <button onClick={() => { logout(); setDropdownOpen(false); }}>
+                  Sair
+                </button>
               </div>
             </div>
           ) : (

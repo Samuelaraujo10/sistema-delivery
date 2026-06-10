@@ -4,6 +4,7 @@ import { Zap, Eye, EyeOff } from 'lucide-react';
 import { authAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
+import logoImg from '../assets/logo_cgdelivery.png';
 import './AuthPage.css';
 
 export default function RegisterPage() {
@@ -15,6 +16,10 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.phone.trim()) {
+      toast.error('O número de WhatsApp é obrigatório');
+      return;
+    }
     setLoading(true);
     try {
       const { data } = await authAPI.register(form);
@@ -37,8 +42,8 @@ export default function RegisterPage() {
 
       <div className="auth-card scale-in">
         <div className="auth-logo">
-          <div className="auth-logo-icon"><Zap size={22} fill="currentColor" /></div>
-          <span>DeliveryApp</span>
+          <div className="auth-logo-icon"><img src={logoImg} className="auth-logo-img" alt="CG Delivery logo" /></div>
+          <span>CGDelivery</span>
         </div>
 
         <h1 className="auth-title">Criar conta</h1>
@@ -58,9 +63,9 @@ export default function RegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Telefone</label>
+            <label className="form-label">WhatsApp (Celular) *</label>
             <input type="tel" className="input" placeholder="(11) 99999-9999"
-              value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
           </div>
 
           <div className="form-group">

@@ -4,6 +4,7 @@ import { Zap, Eye, EyeOff } from 'lucide-react';
 import { authAPI } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
+import logoImg from '../assets/logo_cgdelivery.png';
 import './AuthPage.css';
 
 export default function LoginPage() {
@@ -18,9 +19,19 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const { data } = await authAPI.login(form);
-      login(data.data.user, data.data.token);
-      toast.success(`Bem-vindo, ${data.data.user.name}! 👋`);
-      navigate('/');
+      const loggedUser = data.data.user;
+      login(loggedUser, data.data.token);
+      toast.success(`Bem-vindo, ${loggedUser.name}! 👋`);
+      
+      if (loggedUser.role === 'admin') {
+        if (loggedUser.establishmentId) {
+          navigate(`/store/${loggedUser.establishment?.slug || ''}`);
+        } else {
+          navigate('/admin');
+        }
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Erro ao fazer login');
     } finally {
@@ -38,16 +49,17 @@ export default function LoginPage() {
       <div className="auth-card scale-in">
         <div className="auth-logo">
           <div className="auth-logo-icon">
-            <Zap size={22} fill="currentColor" />
+            <img src={logoImg} className="auth-logo-img" alt="CG Delivery logo" />
           </div>
-          <span>DeliveryApp</span>
+          <span>CGDelivery</span>
         </div>
 
         <h1 className="auth-title">Entrar na conta</h1>
         <p className="auth-subtitle">Acesse para acompanhar seus pedidos</p>
 
-        <div className="auth-demo-hint">
-          <strong>Demo:</strong> admin@delivery.com / 123456
+        <div className="auth-demo-hint" style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem', padding: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', margin: '12px 0' }}>
+          <div><strong>Demo Cliente:</strong> joao@email.com / 123456</div>
+          <div><strong>Demo Lojista:</strong> rafa@delivery.com / admin</div>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
