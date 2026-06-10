@@ -5,60 +5,86 @@ async function setup() {
   try {
     await sequelize.authenticate();
     
-    const pastaCo = await Establishment.findOne({ where: { name: 'Pasta & Co.' } });
-    
-    if (!pastaCo) {
-      console.error('Restaurante Pasta & Co. não encontrado. Rode o seed primeiro.');
+    const rafaBistro = await Establishment.findOne({ where: { name: 'Rafa Bistrô' } });
+    if (!rafaBistro) {
+      console.error('Restaurante Rafa Bistrô não encontrado. Rode o seed primeiro.');
       return;
     }
 
-    // Criar ou atualizar admin restrito
-    const [user, created] = await User.findOrCreate({
-      where: { email: 'adminpasta@delivery.com' },
+    // 1. Criar ou atualizar Lojista Demo (Rafa Lojista)
+    const [lojista, lojistaCreated] = await User.findOrCreate({
+      where: { email: 'rafa@delivery.com' },
       defaults: {
-        name: 'Admin Pasta & Co',
+        name: 'Rafa Lojista',
         password: 'admin',
         role: 'admin',
-        establishmentId: pastaCo.id
+        establishmentId: rafaBistro.id
       }
     });
 
-    if (!created) {
-      await user.update({
+    if (!lojistaCreated) {
+      await lojista.update({
+        name: 'Rafa Lojista',
         role: 'admin',
-        establishmentId: pastaCo.id,
+        establishmentId: rafaBistro.id,
         password: 'admin' // vai ser hasheado pelo hook
       });
     }
 
-    console.log('✅ Admin restrito configurado!');
-    console.log('E-mail: adminpasta@delivery.com');
+    console.log('✅ Lojista configurado!');
+    console.log('E-mail: rafa@delivery.com');
     console.log('Senha: admin');
-    console.log('Restaurante vinculado:', pastaCo.name);
+    console.log('Restaurante vinculado:', rafaBistro.name);
 
-    // Criar ou atualizar admin global (Super Admin)
-    const [superUser, superCreated] = await User.findOrCreate({
-      where: { email: 'superadmin@delivery.com' },
+    // 2. Criar ou atualizar Cliente Demo (João Silva)
+    const [cliente, clienteCreated] = await User.findOrCreate({
+      where: { email: 'joao@email.com' },
       defaults: {
-        name: 'Super Admin',
-        password: 'admin',
+        name: 'João Silva',
+        email: 'joao@email.com',
+        password: '123456',
+        phone: '(11) 98888-7777',
+        role: 'customer',
+        establishmentId: null
+      }
+    });
+
+    if (!clienteCreated) {
+      await cliente.update({
+        name: 'João Silva',
+        role: 'customer',
+        establishmentId: null,
+        password: '123456'
+      });
+    }
+
+    console.log('\n✅ Cliente Demo configurado!');
+    console.log('E-mail: joao@email.com');
+    console.log('Senha: 123456');
+
+    // 3. Criar ou atualizar Super Admin Demo (admin@delivery.com)
+    const [admin, adminCreated] = await User.findOrCreate({
+      where: { email: 'admin@delivery.com' },
+      defaults: {
+        name: 'Admin Global',
+        password: '123456',
         role: 'admin',
         establishmentId: null
       }
     });
-    
-    if (!superCreated) {
-       await superUser.update({
-         role: 'admin',
-         establishmentId: null,
-         password: 'admin'
-       });
+
+    if (!adminCreated) {
+      await admin.update({
+        name: 'Admin Global',
+        role: 'admin',
+        establishmentId: null,
+        password: '123456'
+      });
     }
 
-    console.log('\n✅ Super Admin configurado!');
-    console.log('E-mail: superadmin@delivery.com');
-    console.log('Senha: admin');
-    console.log('Acesso: Global');
+    console.log('\n✅ Admin Global configurado!');
+    console.log('E-mail: admin@delivery.com');
+    console.log('Senha: 123456');
 
   } catch (error) {
     console.error('Erro:', error);
