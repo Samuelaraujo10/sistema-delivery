@@ -3,6 +3,7 @@ import { X, ShoppingBag } from 'lucide-react';
 import ProductModifierGroup from './ProductModifierGroup';
 import { useCartStore } from '../store/cartStore';
 import toast from 'react-hot-toast';
+import { getEmojiByName, isImageEmoji } from '../utils/emojiMap';
 import './ProductDetailModal.css';
 
 const ProductDetailModal = ({ product, establishment, onClose }) => {
@@ -73,7 +74,19 @@ const ProductDetailModal = ({ product, establishment, onClose }) => {
         </button>
 
         <div className="modal-header-image">
-          <img src={product.image || 'https://via.placeholder.com/600x300?text=' + product.name} alt={product.name} />
+          {product.image ? (
+            <img src={product.image} alt={product.name} />
+          ) : isImageEmoji(getEmojiByName(product.name, '')) ? (
+            <div className="modal-image-emoji-container">
+              <img 
+                src={getEmojiByName(product.name, '')} 
+                alt={product.name} 
+                className="modal-image-emoji-img" 
+              />
+            </div>
+          ) : (
+            <img src={'https://via.placeholder.com/600x300?text=' + product.name} alt={product.name} />
+          )}
         </div>
 
         <div className="modal-body">

@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, ChevronRight, Zap, Star, Clock } from 'lucide-react';
 import { establishmentsAPI } from '../services/api';
 import EstablishmentCard from '../components/EstablishmentCard';
 import EstablishmentSkeleton from '../components/EstablishmentSkeleton';
+import { useAuthStore } from '../store/authStore';
+import logoImg from '../assets/logo_cgdelivery.png';
 import './Home.css';
 
 const FILTERS = [
@@ -12,13 +15,26 @@ const FILTERS = [
   { key: 'burger', label: 'Burger', emoji: '🍔' },
   { key: 'sushi', label: 'Sushi', emoji: '🍱' },
   { key: 'bakery', label: 'Padaria', emoji: '🥐' },
+  { key: 'pasta', label: 'Massas', emoji: '🍝' },
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [establishments, setEstablishments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    if (user && user.role === 'admin') {
+      if (user.establishmentId) {
+        navigate(`/store/${user.establishment?.slug || ''}`);
+      } else {
+        navigate('/admin');
+      }
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchEstablishments = async () => {
@@ -51,14 +67,14 @@ export default function Home() {
         </div>
         <div className="container hero-content">
           <div className="hero-badge">
-            <Zap size={14} fill="currentColor" /> Entrega rápida na sua cidade
+<img src={logoImg} className="hero-badge-emoji" alt="CG Delivery logo" /> Entrega rápida em Campo Grande
           </div>
           <h1 className="hero-title">
-            Seu restaurante<br />
-            <span className="hero-accent">favorito</span> em casa
+            Os melhores<br />
+            <span className="hero-accent">restaurantes da cidade</span>  em um só lugar.
           </h1>
           <p className="hero-subtitle">
-            Escolha entre centenas de restaurantes e receba seu pedido com agilidade e sabor.
+            Escolha seu restaurante favorito e receba seu pedido com agilidade e sabor.
           </p>
 
           <div className="hero-search">
@@ -72,23 +88,6 @@ export default function Home() {
             {search && (
               <button className="search-clear" onClick={() => setSearch('')}>✕</button>
             )}
-          </div>
-
-          <div className="hero-stats">
-            <div className="stat-item">
-              <span className="stat-value">200+</span>
-              <span className="stat-label">Restaurantes</span>
-            </div>
-            <div className="stat-divider" />
-            <div className="stat-item">
-              <span className="stat-value">30min</span>
-              <span className="stat-label">Tempo médio</span>
-            </div>
-            <div className="stat-divider" />
-            <div className="stat-item">
-              <span className="stat-value">4.8 ⭐</span>
-              <span className="stat-label">Avaliação</span>
-            </div>
           </div>
         </div>
       </section>

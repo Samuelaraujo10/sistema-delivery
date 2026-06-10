@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Star, Clock, Bike, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getReadableColor } from '../utils/colorUtils';
 import './EstablishmentCard.css';
 
 const TYPE_EMOJIS = {
@@ -12,6 +13,8 @@ const TYPE_EMOJIS = {
   chinese: '🥡',
   bakery: '🥐',
   other: '🍽️',
+  massas: '🍝',
+  pasta: '🍝',
 };
 
 const TYPE_LABELS = {
@@ -19,14 +22,13 @@ const TYPE_LABELS = {
   pizza: 'Pizzaria',
   burger: 'Hamburgueria',
   sushi: 'Sushi',
-  mexican: 'Mexicano',
-  chinese: 'Chinês',
-  bakery: 'Padaria',
-  other: 'Restaurante',
+  padaria: 'Padaria/Doceria',
+  other: 'Variados',
+  massas: 'Massas',
 };
 
 export default function EstablishmentCard({ establishment }) {
-  const { name, slug, type, description, primaryColor, secondaryColor, rating, deliveryTime, deliveryFee, minOrder, isOpen } = establishment;
+  const { name, slug, type, description, primaryColor, secondaryColor, rating, deliveryTime, deliveryFee, minOrder, isOpen, logo } = establishment;
 
   return (
     <motion.div
@@ -44,21 +46,40 @@ export default function EstablishmentCard({ establishment }) {
           borderBottom: `1px solid ${primaryColor}30`,
         }}
       >
-        <div className="est-card-emoji">{TYPE_EMOJIS[type] || '🍽️'}</div>
-        <div
-          className="est-card-glow"
-          style={{ background: `radial-gradient(circle, ${primaryColor}40 0%, transparent 70%)` }}
-        />
+        {logo ? (
+          <div className="est-card-branded">
+            <div className="est-card-blur" style={{ backgroundImage: `url(${logo})` }} />
+            <img src={logo} alt={name} className="est-card-main-img" />
+          </div>
+        ) : (
+          <>
+            <div className="est-card-emoji">{TYPE_EMOJIS[type] || '🍽️'}</div>
+            <div
+              className="est-card-glow"
+              style={{ background: `radial-gradient(circle, ${primaryColor}40 0%, transparent 70%)` }}
+            />
+          </>
+        )}
+
+
         {!isOpen && (
           <div className="est-card-closed">Fechado</div>
         )}
       </div>
 
+
+
       <div className="est-card-body">
         <div className="est-card-header">
           <div>
             <h3 className="est-card-name">{name}</h3>
-            <span className="badge badge-primary" style={{ background: `${primaryColor}20`, color: primaryColor }}>
+            <span 
+              className="badge badge-primary" 
+              style={{ 
+                background: getReadableColor(primaryColor).bg, 
+                color: getReadableColor(primaryColor).text 
+              }}
+            >
               {TYPE_LABELS[type]}
             </span>
           </div>

@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { useCartStore } from '../store/cartStore';
 import ProductDetailModal from './ProductDetailModal';
 import toast from 'react-hot-toast';
+import { getEmojiByName, isImageEmoji } from '../utils/emojiMap';
+import { useAuthStore } from '../store/authStore';
 import './ProductCard.css';
 
 const typeEmoji = {
@@ -16,6 +18,8 @@ export default function ProductCard({ product, establishment, isAdminMode, onEdi
   const [modalOpen, setModalOpen] = useState(false);
   const { items, addItem, updateQuantity } = useCartStore();
   const { cartEstablishment } = useCartStore(s => ({ cartEstablishment: s.establishment }));
+  const { user } = useAuthStore();
+  const isUserAdmin = user?.role === 'admin';
 
   const cartItem = items.find(i => i.id === product.id && !i.selectedModifiers);
 
@@ -31,7 +35,7 @@ export default function ProductCard({ product, establishment, isAdminMode, onEdi
       toast((t) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <strong>Limpar carrinho?</strong>
-          <p style={{ fontSize: 13, color: '#888' }}>Voce ja tem itens de outro estabelecimento.</p>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Voce ja tem itens de outro estabelecimento.</p>
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               onClick={() => { addItem(product, establishment); toast.dismiss(t.id); }}
@@ -58,12 +62,16 @@ export default function ProductCard({ product, establishment, isAdminMode, onEdi
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.2 }}
-        className={`product-card ${!product.available ? 'is-unavailable' : ''}`}
-        onClick={() => (product.modifierGroups?.length > 0 && !isAdminMode) ? setModalOpen(true) : null}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className={`product-card ${!product.available ? 'is-unavailable' : ''} ${product.modifierGroups?.length > 0 && !isAdminMode && !isUserAdmin ? 'is-clickable' : ''}`}
+        style={{
+          '--theme-primary': establishment.primaryColor,
+          '--theme-secondary': establishment.secondaryColor || establishment.primaryColor,
+        }}
+        onClick={() => (product.modifierGroups?.length > 0 && !isAdminMode && !isUserAdmin) ? setModalOpen(true) : null}
       >
         {isAdminMode && (
           <div className="product-admin-overlay">
@@ -82,9 +90,18 @@ export default function ProductCard({ product, establishment, isAdminMode, onEdi
         <div className="product-card-image">
           {product.image ? (
             <img src={product.image} alt={product.name} />
+          ) : isImageEmoji(getEmojiByName(product.name, typeEmoji[establishment.type])) ? (
+            <div className="product-emoji product-emoji-sticker">
+              <img 
+                src={getEmojiByName(product.name, typeEmoji[establishment.type])} 
+                className="product-emoji-sticker-img" 
+                alt={product.name} 
+              />
+            </div>
           ) : (
-            <div className="product-emoji">{typeEmoji[establishment.type] || 'FD'}</div>
+            <div className="product-emoji">{getEmojiByName(product.name, typeEmoji[establishment.type])}</div>
           )}
+
           {discount && <span className="product-discount">-{discount}%</span>}
           {product.featured && <span className="product-featured">Destaque</span>}
           {!product.available && <span className="product-unavailable-badge">Esgotado</span>}
@@ -107,23 +124,25 @@ export default function ProductCard({ product, establishment, isAdminMode, onEdi
               <span className="product-price">R$ {parseFloat(product.price).toFixed(2)}</span>
             </div>
 
-            {cartItem ? (
-              <div className="product-qty-ctrl">
-                <button
-                  className="qty-btn"
-                  onClick={(e) => { e.stopPropagation(); updateQuantity(cartItem.cartId, cartItem.quantity - 1); }}
-                >
-                  <Minus size={14} />
+            {!isUserAdmin && (
+              cartItem ? (
+                <div className="product-qty-ctrl">
+                  <button
+                    className="qty-btn"
+                    onClick={(e) => { e.stopPropagation(); updateQuantity(cartItem.cartId, cartItem.quantity - 1); }}
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <span className="qty-value">{cartItem.quantity}</span>
+                  <button className="qty-btn" onClick={handleAdd}>
+                    <Plus size={14} />
+                  </button>
+                </div>
+              ) : (
+                <button className="btn btn-primary" onClick={handleAdd}>
+                  <Plus size={16} />
                 </button>
-                <span className="qty-value">{cartItem.quantity}</span>
-                <button className="qty-btn" onClick={handleAdd}>
-                  <Plus size={14} />
-                </button>
-              </div>
-            ) : (
-              <button className="product-add-btn" onClick={handleAdd}>
-                <Plus size={16} />
-              </button>
+              )
             )}
           </div>
         </div>

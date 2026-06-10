@@ -1,5 +1,48 @@
-const { Establishment, Category, Product } = require('../models');
+const { Establishment, Category, Product, User } = require('../models');
 const { Op } = require('sequelize');
+const { sequelize } = require('../database');
+
+const normalizeEstablishmentPayload = (payload) => {
+  const data = { ...payload };
+
+  if ('deliveryFee' in data) {
+    if (data.deliveryFee === '' || data.deliveryFee === null || data.deliveryFee === undefined) {
+      data.deliveryFee = 0;
+    } else {
+      const val = parseFloat(data.deliveryFee);
+      data.deliveryFee = isNaN(val) ? 0 : val;
+    }
+  }
+
+  if ('minOrder' in data) {
+    if (data.minOrder === '' || data.minOrder === null || data.minOrder === undefined) {
+      data.minOrder = 0;
+    } else {
+      const val = parseFloat(data.minOrder);
+      data.minOrder = isNaN(val) ? 0 : val;
+    }
+  }
+
+  if ('deliveryTime' in data) {
+    if (data.deliveryTime === '' || data.deliveryTime === null || data.deliveryTime === undefined) {
+      data.deliveryTime = 40;
+    } else {
+      const val = parseInt(data.deliveryTime, 10);
+      data.deliveryTime = isNaN(val) ? 40 : val;
+    }
+  }
+
+  if ('hasBuilder' in data) {
+    if (typeof data.hasBuilder === 'string') {
+      data.hasBuilder = data.hasBuilder === 'true';
+    }
+  }
+
+  // Remove campos vazios que não devem ser sobrescritos por strings vazias se não enviados
+  if (data.logo === '') delete data.logo;
+
+  return data;
+};
 
 class EstablishmentController {
   async index(req, res) {
@@ -24,6 +67,13 @@ class EstablishmentController {
   async show(req, res) {
     try {
       const { slug } = req.params;
+      const { adminView } = req.query;
+
+      const productWhere = {};
+      if (adminView !== 'true') {
+        productWhere.available = true;
+      }
+
       const establishment = await Establishment.findOne({
         where: { slug, active: true },
         include: [
@@ -37,7 +87,7 @@ class EstablishmentController {
               {
                 model: Product,
                 as: 'products',
-                where: { available: true },
+                where: productWhere,
                 required: false,
               },
             ],
@@ -62,19 +112,51 @@ class EstablishmentController {
         return res.status(403).json({ success: false, message: 'Apenas Administradores Gerais podem criar novas lojas.' });
       }
 
-      const { name, type, description, primaryColor, secondaryColor, deliveryFee, minOrder, deliveryTime, address, phone } = req.body;
+      const { name } = req.body;
+      if (!name) {
+        return res.status(400).json({ success: false, message: 'O nome da loja é obrigatório.' });
+      }
+
       const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
       const existing = await Establishment.findOne({ where: { slug } });
       const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
 
-      const establishment = await Establishment.create({
-        name, type, description, slug: finalSlug,
-        primaryColor, secondaryColor, deliveryFee, minOrder, deliveryTime, address, phone,
+      const data = normalizeEstablishmentPayload({
+        ...req.body,
+        slug: finalSlug
+      });
+
+      if (req.file) {
+        data.logo = `/uploads/establishments/${req.file.filename}`;
+      }
+
+      const establishment = await sequelize.transaction(async (t) => {
+        const est = await Establishment.create(data, { transaction: t });
+
+        // If email and password are provided, create an admin user for this establishment
+        if (req.body.email && req.body.password) {
+          const userPayload = {
+            name: req.body.name || 'Admin',
+            email: req.body.email,
+            password: req.body.password,
+            role: 'admin',
+            establishmentId: est.id,
+            phone: req.body.phone || ''
+          };
+          await User.create(userPayload, { transaction: t });
+        }
+        return est;
       });
 
       return res.status(201).json({ success: true, data: establishment });
     } catch (error) {
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        const field = error.errors?.[0]?.path;
+        if (field === 'email') {
+          return res.status(400).json({ success: false, message: 'O e-mail de login fornecido já está em uso por outro usuário.' });
+        }
+      }
       return res.status(400).json({ success: false, message: error.message });
     }
   }
@@ -94,12 +176,20 @@ class EstablishmentController {
         return res.status(404).json({ success: false, message: 'Estabelecimento não encontrado' });
       }
 
-      await establishment.update(req.body);
+      const data = normalizeEstablishmentPayload(req.body);
+      
+      if (req.file) {
+        data.logo = `/uploads/establishments/${req.file.filename}`;
+      }
+
+      await establishment.update(data);
       return res.json({ success: true, data: establishment });
     } catch (error) {
       return res.status(400).json({ success: false, message: error.message });
     }
   }
+
+
 
   async toggleOpen(req, res) {
     try {

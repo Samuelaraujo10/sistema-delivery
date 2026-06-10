@@ -74,21 +74,26 @@ class ProductController {
       if (adminView !== 'true') {
         where.available = true;
       }
-
+ 
       // Busca todos os produtos com builderRole != 'none'
       const products = await Product.findAll({
         where,
+        include: [{ model: Category, as: 'category' }],
         order: [['featured', 'DESC'], ['price', 'ASC']],
       });
-
+ 
       // Agrupa por builderRole
       const result = products.reduce((acc, product) => {
-        const role = product.builderRole;
+        let role = product.builderRole;
+        // Compatibilidade: se o role for topping mas o nome da categoria contiver "complemento", mapeia para complemento
+        if (role === 'topping' && product.category?.name?.toLowerCase()?.includes('complemento')) {
+          role = 'complemento';
+        }
         if (!acc[role]) acc[role] = [];
         acc[role].push(product);
         return acc;
       }, {});
-
+ 
       return res.json({ success: true, data: result });
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message });
