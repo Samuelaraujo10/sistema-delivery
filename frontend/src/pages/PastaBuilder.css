@@ -243,7 +243,7 @@
   gap: 14px;
   padding: 16px;
   background: var(--bg-card);
-  border: 1.5px solid var(--border);
+  border: 1.5px solid rgba(255, 255, 255, 0.12); /* increased contrast from var(--border) */
   border-radius: var(--radius-lg);
   text-align: left;
   cursor: pointer;
@@ -251,13 +251,26 @@
 }
 
 .pb-option:hover {
-  border-color: var(--border-hover);
+  border-color: rgba(255, 255, 255, 0.25); /* increased contrast from var(--border-hover) */
   transform: translateY(-2px);
   box-shadow: var(--shadow);
 }
 
 .pb-option.selected {
   transform: translateY(-3px);
+  border-width: 2px !important;
+}
+
+.pb-option.selected .pb-option-name {
+  color: #ffffff !important;
+}
+
+.pb-option.selected .pb-option-desc {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.pb-option.selected .pb-option-price {
+  font-weight: 800 !important;
 }
 
 .pb-option-star {

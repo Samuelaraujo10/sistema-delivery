@@ -6,6 +6,9 @@ import {
 import { establishmentsAPI, productsAPI } from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import toast from 'react-hot-toast';
+import { getEmojiByName } from '../utils/emojiMap';
+import { useAuthStore } from '../store/authStore';
+import SuggestionsModal from '../components/SuggestionsModal';
 import './PizzaBuilder.css';
 
 const STEPS = [
@@ -15,61 +18,62 @@ const STEPS = [
     subtitle: 'Escolha a dimensão da sua pizza',
     emoji: '📏',
     color: '#EF4444',
-    bg: 'rgba(239,68,68,0.08)',
-    border: 'rgba(239,68,68,0.25)',
+    bg: 'rgba(239,68,68,0.16)',
+    border: 'rgba(239,68,68,0.45)',
     single: true,
   },
   {
     key: 'sabor',
     label: 'Sabores',
-    subtitle: 'Escolha o sabor da sua pizza',
+    subtitle: 'Escolha até 3 sabores',
     emoji: '🍕',
     color: '#F59E0B',
-    bg: 'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.25)',
-    single: true, // Por enquanto 1 sabor, mas podemos expandir para meio a meio
+    bg: 'rgba(245,158,11,0.16)',
+    border: 'rgba(245,158,11,0.45)',
+    single: false,
+    max: 3,
   },
   {
     key: 'borda',
     label: 'Borda',
-    subtitle: 'Adicione uma borda recheada',
+    subtitle: 'Adicione uma borda recheada (Opcional)',
     emoji: '🥯',
     color: '#10B981',
-    bg: 'rgba(16,185,129,0.08)',
-    border: 'rgba(16,185,129,0.25)',
+    bg: 'rgba(16,185,129,0.16)',
+    border: 'rgba(16,185,129,0.45)',
     single: true,
+    required: false,
   },
 ];
 
-const PIZZA_EMOJIS = {
-  'Pizza P (4 Fatias)': '🍕', 'Pizza M (6 Fatias)': '🍕', 'Pizza G (8 Fatias)': '🍕',
-  'Calabresa Tradicional': '🍕', 'Marguerita Especial': '🍅', 'Carne de Sol com Nata': '🥩',
-  'Frango com Catupiry': '🍗', 'Quatro Queijos': '🧀',
-  'Sem Borda Recheada': '🥖', 'Borda de Catupiry': '🥯', 'Borda de Cheddar': '🥯', 'Borda de Chocolate': '🍫',
-};
-
-export default function PizzaBuilder() {
+export default function PizzaBuilder({ isEmbedded = false, onClose = null, embeddedEstablishment = null }) {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCartStore();
+  const { user } = useAuthStore();
+  const isUserAdmin = user?.role === 'admin';
 
-  const [establishment, setEstablishment] = useState(null);
+  const [establishment, setEstablishment] = useState(embeddedEstablishment);
   const [items, setItems] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [selections, setSelections] = useState({
     tamanho: null,
-    sabor: null,
+    sabor: [],
     borda: null,
   });
   const [showSummary, setShowSummary] = useState(false);
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
-        const [estRes] = await Promise.all([establishmentsAPI.getBySlug(slug)]);
-        const est = estRes.data.data;
+        let est = embeddedEstablishment;
+        if (!est) {
+          const [estRes] = await Promise.all([establishmentsAPI.getBySlug(slug)]);
+          est = estRes.data.data;
+        }
         setEstablishment(est);
         const itemsRes = await productsAPI.builderItems(est.id);
         setItems(itemsRes.data.data);
@@ -81,17 +85,36 @@ export default function PizzaBuilder() {
       }
     };
     load();
-  }, [slug]);
+  }, [slug, embeddedEstablishment]);
 
-  const handleSelect = (stepKey, product) => {
-    setSelections(prev => ({ ...prev, [stepKey]: product }));
+  const handleSelect = (stepKey, product, single, max) => {
+    if (single) {
+      setSelections(prev => ({ ...prev, [stepKey]: product }));
+    } else {
+      setSelections(prev => {
+        const arr = prev[stepKey];
+        const exists = arr.find(i => i.id === product.id);
+        if (exists) {
+          return { ...prev, [stepKey]: arr.filter(i => i.id !== product.id) };
+        } else {
+          if (max && arr.length >= max) {
+            toast.error(`Você pode escolher no máximo ${max} opções.`);
+            return prev;
+          }
+          return { ...prev, [stepKey]: [...arr, product] };
+        }
+      });
+    }
   };
 
   const calcTotal = () => {
     const { tamanho, sabor, borda } = selections;
     let total = 0;
     if (tamanho) total += parseFloat(tamanho.price);
-    if (sabor) total += parseFloat(sabor.price);
+    if (sabor && sabor.length > 0) {
+      const highestSaborPrice = Math.max(...sabor.map(s => parseFloat(s.price)));
+      total += highestSaborPrice;
+    }
     if (borda) total += parseFloat(borda.price);
     return total;
   };
@@ -110,20 +133,42 @@ export default function PizzaBuilder() {
   };
 
   const handleAddToCart = () => {
+    if (isUserAdmin) {
+      toast.error('Administradores não podem realizar pedidos.');
+      return;
+    }
     const { tamanho, sabor, borda } = selections;
     
+    const saboresText = sabor.map(s => s.name).join(', ');
     const compositeProduct = {
       id: `pizza-${Date.now()}`,
-      name: `${sabor.name}`,
-      description: `${tamanho.name} ${borda.name !== 'Sem Borda Recheada' ? `• Borda: ${borda.name}` : ''}`,
+      name: `Pizza ${tamanho.name.split(' ')[0]}`,
+      description: `${saboresText} ${borda && borda.name !== 'Sem Borda' ? `• Borda: ${borda.name}` : '• Sem Borda Recheada'}`,
       price: calcTotal(),
       isCustomPizza: true,
-      pizzaSelections: { tamanho, sabor, borda },
+      pizzaSelections: { tamanho, sabor, borda: borda || { name: 'Sem Borda', price: 0 } },
     };
 
     addItem(compositeProduct, establishment);
     toast.success('Sua pizza foi adicionada ao carrinho! 🍕', { duration: 2500 });
-    navigate('/cart');
+    
+    const hasSuggestions = establishment?.categories?.some(cat => {
+      const catName = cat.name.toLowerCase();
+      const isSugCat = catName.includes('bebida') || catName.includes('suco') || catName.includes('refrigerante') || catName.includes('água') || catName.includes('drink') ||
+                       catName.includes('sobremesa') || catName.includes('doce') || catName.includes('chocolate') || catName.includes('sorvete') || catName.includes('milkshake') ||
+                       catName.includes('acompanhamento') || catName.includes('porção') || catName.includes('entrada') || catName.includes('batata') || catName.includes('side') || catName.includes('onion');
+      return isSugCat && cat.products?.some(p => (!p.builderRole || p.builderRole === 'none') && p.available !== false);
+    });
+
+    if (hasSuggestions) {
+      setIsSuggestionsOpen(true);
+    } else {
+      if (isEmbedded && onClose) {
+        onClose();
+      } else {
+        navigate('/cart');
+      }
+    }
   };
 
   if (loading) return <div className="pb-loading"><div className="pb-loading-spinner">🍕</div></div>;
@@ -145,26 +190,59 @@ export default function PizzaBuilder() {
               <p>Confira os detalhes do seu pedido</p>
             </div>
             <div className="pb-summary-items">
-              {[
-                { label: 'Tamanho', emoji: '📏', item: tamanho, color: '#EF4444' },
-                { label: 'Sabor', emoji: '🍕', item: sabor, color: '#F59E0B' },
-                { label: 'Borda', emoji: '🥯', item: borda, color: '#10B981' },
-              ].map(({ label, emoji, item, color }) => item && (
-                <div key={label} className="pb-summary-row" style={{ borderColor: `${color}30` }}>
-                  <div className="pb-summary-row-left">
-                    <span className="pb-summary-emoji">{PIZZA_EMOJIS[item.name] || emoji}</span>
-                    <div><span className="pb-summary-cat" style={{color}}>{label}</span><span className="pb-summary-name">{item.name}</span></div>
-                  </div>
-                  <span className="pb-summary-price">{parseFloat(item.price) === 0 ? 'Incluso' : `R$ ${parseFloat(item.price).toFixed(2)}`}</span>
+              <div className="pb-summary-row" style={{ borderColor: '#EF444430' }}>
+                <div className="pb-summary-row-left">
+                  <span className="pb-summary-emoji">{getEmojiByName(tamanho.name, '📏')}</span>
+                  <div><span className="pb-summary-cat" style={{color: '#EF4444'}}>Tamanho</span><span className="pb-summary-name">{tamanho.name}</span></div>
                 </div>
-              ))}
+                <span className="pb-summary-price">R$ {parseFloat(tamanho.price).toFixed(2)}</span>
+              </div>
+              
+              {sabor.length > 0 && (
+                <div className="pb-summary-group">
+                  <span className="pb-summary-cat" style={{ color: '#F59E0B' }}>🍕 Sabores (até 3)</span>
+                  {sabor.map(s => (
+                    <div key={s.id} className="pb-summary-row pb-topping-row">
+                      <div className="pb-summary-row-left">
+                        <span className="pb-summary-emoji">{getEmojiByName(s.name, '🍕')}</span>
+                        <span className="pb-summary-name">{s.name}</span>
+                      </div>
+                      <span className="pb-summary-price">{parseFloat(s.price) === 0 ? 'Incluso' : `Maior valor (R$ ${parseFloat(s.price).toFixed(2)})`}</span>
+                    </div>
+                  ))}
+                  {sabor.length > 1 && (
+                    <div className="pb-summary-row pb-topping-row" style={{ marginTop: '4px', opacity: 0.7 }}>
+                      <div className="pb-summary-row-left"><span className="pb-summary-emoji">ℹ️</span><span className="pb-summary-name" style={{fontSize: '11px'}}>Cobrado pelo sabor de maior valor</span></div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {borda && (
+                <div className="pb-summary-row" style={{ borderColor: '#10B98130' }}>
+                  <div className="pb-summary-row-left">
+                    <span className="pb-summary-emoji">{getEmojiByName(borda.name, '🥯')}</span>
+                    <div><span className="pb-summary-cat" style={{color: '#10B981'}}>Borda</span><span className="pb-summary-name">{borda.name}</span></div>
+                  </div>
+                  <span className="pb-summary-price">{parseFloat(borda.price) === 0 ? 'Incluso' : `R$ ${parseFloat(borda.price).toFixed(2)}`}</span>
+                </div>
+              )}
             </div>
             <div className="pb-summary-total"><span>Total</span><span className="pb-total-value">R$ {total.toFixed(2)}</span></div>
-            <button className="btn btn-primary btn-lg pb-cart-btn pizza-btn" onClick={handleAddToCart}>
-              <ShoppingCart size={20} /> Adicionar ao carrinho
-            </button>
+            {!isUserAdmin && (
+              <button className="btn btn-primary btn-lg pb-cart-btn pizza-btn" onClick={handleAddToCart}>
+                <ShoppingCart size={20} /> Adicionar ao carrinho
+              </button>
+            )}
           </div>
         </div>
+        <SuggestionsModal 
+          isOpen={isSuggestionsOpen} 
+          onClose={isEmbedded && onClose ? onClose : () => navigate('/cart')} 
+          establishment={establishment}
+          onGoToCart={() => navigate('/cart')}
+          onContinue={isEmbedded && onClose ? onClose : () => navigate(`/store/${slug}`)}
+        />
       </div>
     );
   }
@@ -173,7 +251,13 @@ export default function PizzaBuilder() {
     <div className="pb-page pizza-theme">
       <div className="container pb-container">
         <div className="pb-header">
-          <Link to={`/store/${slug}`} className="pb-back-btn"><ArrowLeft size={16} /> Voltar</Link>
+          {isEmbedded ? (
+            <button onClick={onClose} className="pb-back-btn" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <ArrowLeft size={16} /> Voltar
+            </button>
+          ) : (
+            <Link to={`/store/${slug}`} className="pb-back-btn"><ArrowLeft size={16} /> Voltar</Link>
+          )}
           <div className="pb-title-row">
             <div>
               <h1 className="pb-title pizza-text-gradient">Monte sua Pizza</h1>
@@ -184,30 +268,34 @@ export default function PizzaBuilder() {
         </div>
 
         <div className="pb-stepper">
-          {STEPS.map((s, i) => (
-            <button key={s.key} className={`pb-step ${i === currentStep ? 'active' : ''} ${selections[s.key] ? 'done' : ''}`}
-              style={i === currentStep ? { borderColor: s.color, background: s.bg } : {}} onClick={() => setCurrentStep(i)}>
-              <div className="pb-step-dot" style={i === currentStep || selections[s.key] ? { background: s.color } : {}}>
-                {selections[s.key] ? <Check size={12} /> : <span>{i + 1}</span>}
-              </div>
-              <div className="pb-step-label"><span className="pb-step-emoji">{s.emoji}</span><span>{s.label}</span></div>
-            </button>
-          ))}
+          {STEPS.map((s, i) => {
+            const isDone = s.single ? selections[s.key] : selections[s.key] && selections[s.key].length > 0;
+            return (
+              <button key={s.key} className={`pb-step ${i === currentStep ? 'active' : ''} ${isDone ? 'done' : ''}`}
+                style={i === currentStep ? { borderColor: s.color, background: s.bg } : {}} onClick={() => setCurrentStep(i)}>
+                <div className="pb-step-dot" style={i === currentStep || isDone ? { background: s.color } : {}}>
+                  {isDone ? <Check size={12} /> : <span>{i + 1}</span>}
+                </div>
+                <div className="pb-step-label"><span className="pb-step-emoji">{s.emoji}</span><span>{s.label}</span></div>
+              </button>
+            );
+          })}
         </div>
 
         <div className="pb-content fade-in" key={currentStep}>
           <div className="pb-step-header" style={{ borderColor: step.border, background: step.bg }}>
             <span className="pb-step-emoji-lg">{step.emoji}</span>
             <div><h2 className="pb-step-title" style={{ color: step.color }}>{step.label}</h2><p className="pb-step-sub">{step.subtitle}</p></div>
+            {!step.single && <span className="pb-multi-badge pizza-badge" style={{background: step.color + '20', color: step.color}}>Até {step.max} opções</span>}
           </div>
           <div className="pb-options-grid">
             {stepItems.map(product => {
-              const isSelected = selections[step.key]?.id === product.id;
+              const isSelected = step.single ? selections[step.key]?.id === product.id : selections[step.key].some(i => i.id === product.id);
               return (
                 <button key={product.id} className={`pb-option ${isSelected ? 'selected' : ''}`}
-                  style={isSelected ? { borderColor: step.color, background: step.bg } : {}} onClick={() => handleSelect(step.key, product)}>
+                  style={isSelected ? { borderColor: step.color, background: step.bg } : {}} onClick={() => handleSelect(step.key, product, step.single, step.max)}>
                   {product.featured && <div className="pb-option-star"><Star size={10} fill="#FFB800" color="#FFB800" /></div>}
-                  <div className="pb-option-emoji">{PIZZA_EMOJIS[product.name] || '🍕'}</div>
+                  <div className="pb-option-emoji">{getEmojiByName(product.name, step.emoji)}</div>
                   <div className="pb-option-body"><span className="pb-option-name">{product.name}</span><span className="pb-option-desc">{product.description}</span></div>
                   <div className="pb-option-price">{parseFloat(product.price) === 0 ? <span className="pb-free">Grátis</span> : `R$ ${parseFloat(product.price).toFixed(2)}`}</div>
                 </button>
@@ -217,9 +305,13 @@ export default function PizzaBuilder() {
         </div>
 
         <div className="pb-nav">
-          {currentStep > 0 ? <button className="btn btn-ghost pb-nav-btn" onClick={handleBack}><ArrowLeft size={16} /> Anterior</button> : <div />}
-          <button className="btn btn-primary pb-nav-btn pizza-btn" onClick={handleNext} disabled={!selections[step.key]}>
-            {currentStep < STEPS.length - 1 ? <>Próximo <ArrowRight size={16} /></> : <>Ver resumo <Check size={16} /></>}
+          {currentStep > 0 ? <button className="btn btn-primary pb-nav-btn" onClick={handleBack}><ArrowLeft size={16} /> Anterior</button> : <div />}
+          <button className="btn btn-primary pb-nav-btn pizza-btn" onClick={handleNext} disabled={step.required !== false && (!selections[step.key] || (Array.isArray(selections[step.key]) && selections[step.key].length === 0))}>
+            {currentStep < STEPS.length - 1 ? (
+              (step.required === false && (!selections[step.key] || selections[step.key].length === 0)) ? <>Pular etapa <ArrowRight size={16} /></> : <>Próximo <ArrowRight size={16} /></>
+            ) : (
+              (step.required === false && (!selections[step.key] || selections[step.key].length === 0)) ? <>Ir sem borda <Check size={16} /></> : <>Ver resumo <Check size={16} /></>
+            )}
           </button>
         </div>
       </div>

@@ -6,38 +6,43 @@ import {
 import { establishmentsAPI, productsAPI } from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import toast from 'react-hot-toast';
+import { getEmojiByName } from '../utils/emojiMap';
+import { useAuthStore } from '../store/authStore';
+import SuggestionsModal from '../components/SuggestionsModal';
 import './AcaiBuilder.css';
 
 const STEPS = [
   {
     key: 'tamanho',
     label: 'Tamanho',
-    subtitle: 'Escolha o tamanho do seu copo',
+    subtitle: 'Escolha o tamanho do seu Açaí',
     emoji: '🥤',
     color: '#7C3AED',
-    bg: 'rgba(124,58,237,0.08)',
-    border: 'rgba(124,58,237,0.25)',
+    bg: 'rgba(124,58,237,0.16)',
+    border: 'rgba(124,58,237,0.45)',
     single: true,
   },
   {
     key: 'creme',
     label: 'Cremes',
-    subtitle: 'Base de açaí com cremes especiais',
+    subtitle: 'Base de açaí com cremes especiais (Escolha 1)',
     emoji: '🍨',
     color: '#8B5CF6',
-    bg: 'rgba(139,92,246,0.08)',
-    border: 'rgba(139,92,246,0.25)',
+    bg: 'rgba(139,92,246,0.16)',
+    border: 'rgba(139,92,246,0.45)',
     single: false,
+    max: 1,
   },
   {
     key: 'fruta',
     label: 'Frutas',
-    subtitle: 'Selecione as frutas fresquinhas',
+    subtitle: 'Selecione as frutas fresquinhas (Até 2)',
     emoji: '🍓',
     color: '#EF4444',
-    bg: 'rgba(239,68,68,0.08)',
-    border: 'rgba(239,68,68,0.25)',
+    bg: 'rgba(239,68,68,0.16)',
+    border: 'rgba(239,68,68,0.45)',
     single: false,
+    max: 2,
   },
   {
     key: 'complemento',
@@ -45,37 +50,31 @@ const STEPS = [
     subtitle: 'Adicione aquele toque especial',
     emoji: '🥜',
     color: '#F59E0B',
-    bg: 'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.25)',
+    bg: 'rgba(245,158,11,0.16)',
+    border: 'rgba(245,158,11,0.45)',
     single: false,
   },
   {
     key: 'calda',
     label: 'Caldas',
-    subtitle: 'Para finalizar com chave de ouro',
+    subtitle: 'Para finalizar com chave de ouro (Até 2)',
     emoji: '🍯',
     color: '#EC4899',
-    bg: 'rgba(236,72,153,0.08)',
-    border: 'rgba(236,72,153,0.25)',
+    bg: 'rgba(236,72,153,0.16)',
+    border: 'rgba(236,72,153,0.45)',
     single: false,
+    max: 2,
   },
 ];
 
-const ACAI_EMOJIS = {
-  'Copo 300ml': '🥤', 'Copo 500ml': '🥤', 'Copo 700ml': '🥤', 'Tigela 1 Litro': '🥣',
-  'Banana': '🍌', 'Morango': '🍓', 'Manga': '🥭', 'Kiwi': '🥝',
-  'Leite em Pó': '🥛', 'Granola Tradicional': '🥣', 'Paçoca': '🥜', 'M&Ms': '🍫', 'Coco Ralado': '🥥',
-  'Castanha de Caju': '🥜', 'Amendoim Triturado': '🥜',
-  'Creme de Ninho': '🍦', 'Creme de Morango': '🍓', 'Creme de Cupuaçu': '🍨',
-  'Leite Condensado': '🍯', 'Nutella Real': '🍫', 'Mel de Engenho': '🍯',
-};
-
-export default function AcaiBuilder() {
+export default function AcaiBuilder({ isEmbedded = false, onClose = null, embeddedEstablishment = null }) {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCartStore();
+  const { user } = useAuthStore();
+  const isUserAdmin = user?.role === 'admin';
 
-  const [establishment, setEstablishment] = useState(null);
+  const [establishment, setEstablishment] = useState(embeddedEstablishment);
   const [items, setItems] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
@@ -87,13 +86,17 @@ export default function AcaiBuilder() {
     calda: [],
   });
   const [showSummary, setShowSummary] = useState(false);
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
-        const [estRes] = await Promise.all([establishmentsAPI.getBySlug(slug)]);
-        const est = estRes.data.data;
+        let est = embeddedEstablishment;
+        if (!est) {
+          const [estRes] = await Promise.all([establishmentsAPI.getBySlug(slug)]);
+          est = estRes.data.data;
+        }
         setEstablishment(est);
         const itemsRes = await productsAPI.builderItems(est.id);
         setItems(itemsRes.data.data);
@@ -105,15 +108,25 @@ export default function AcaiBuilder() {
       }
     };
     load();
-  }, [slug]);
+  }, [slug, embeddedEstablishment]);
 
-  const handleSelect = (stepKey, product, single) => {
+  const handleSelect = (stepKey, product, single, max) => {
     if (single) {
       setSelections(prev => ({ ...prev, [stepKey]: product }));
     } else {
       setSelections(prev => {
         const arr = prev[stepKey];
         const exists = arr.find(i => i.id === product.id);
+        if (!exists && max && arr.length >= max) {
+          if (max === 1) {
+            return {
+              ...prev,
+              [stepKey]: [product]
+            };
+          }
+          toast.error(`Você pode escolher no máximo ${max} opções.`);
+          return prev;
+        }
         return {
           ...prev,
           [stepKey]: exists ? arr.filter(i => i.id !== product.id) : [...arr, product],
@@ -123,12 +136,10 @@ export default function AcaiBuilder() {
   };
 
   const calcTotal = () => {
-    const { tamanho, creme, fruta, complemento, calda } = selections;
+    const { tamanho } = selections;
     let total = 0;
     if (tamanho) total += parseFloat(tamanho.price);
-    [creme, fruta, complemento, calda].forEach(arr => {
-      arr.forEach(i => { total += parseFloat(i.price); });
-    });
+    // Os adicionais (creme, fruta, complemento, calda) são grátis e ilimitados
     return total;
   };
 
@@ -146,6 +157,10 @@ export default function AcaiBuilder() {
   };
 
   const handleAddToCart = () => {
+    if (isUserAdmin) {
+      toast.error('Administradores não podem realizar pedidos.');
+      return;
+    }
     const { tamanho, creme, fruta, complemento, calda } = selections;
     const extras = [...creme, ...fruta, ...complemento, ...calda].map(i => i.name).join(', ');
     
@@ -160,7 +175,24 @@ export default function AcaiBuilder() {
 
     addItem(compositeProduct, establishment);
     toast.success('Seu açaí foi adicionado ao carrinho! 🍇', { duration: 2500 });
-    navigate('/cart');
+    
+    const hasSuggestions = establishment?.categories?.some(cat => {
+      const catName = cat.name.toLowerCase();
+      const isSugCat = catName.includes('bebida') || catName.includes('suco') || catName.includes('refrigerante') || catName.includes('água') || catName.includes('drink') ||
+                       catName.includes('sobremesa') || catName.includes('doce') || catName.includes('chocolate') || catName.includes('sorvete') || catName.includes('milkshake') ||
+                       catName.includes('acompanhamento') || catName.includes('porção') || catName.includes('entrada') || catName.includes('batata') || catName.includes('side') || catName.includes('onion');
+      return isSugCat && cat.products?.some(p => (!p.builderRole || p.builderRole === 'none') && p.available !== false);
+    });
+
+    if (hasSuggestions) {
+      setIsSuggestionsOpen(true);
+    } else {
+      if (isEmbedded && onClose) {
+        onClose();
+      } else {
+        navigate('/cart');
+      }
+    }
   };
 
   if (loading) return <div className="pb-loading"><div className="pb-loading-spinner">🍇</div></div>;
@@ -196,21 +228,30 @@ export default function AcaiBuilder() {
                   {selections[key].map(item => (
                     <div key={item.id} className="pb-summary-row pb-topping-row">
                       <div className="pb-summary-row-left">
-                        <span className="pb-summary-emoji">{ACAI_EMOJIS[item.name] || '✨'}</span>
+                        <span className="pb-summary-emoji">{getEmojiByName(item.name, '✨')}</span>
                         <span className="pb-summary-name">{item.name}</span>
                       </div>
-                      <span className="pb-summary-price">{parseFloat(item.price) === 0 ? 'Grátis' : `+R$ ${parseFloat(item.price).toFixed(2)}`}</span>
+                      <span className="pb-summary-price">Grátis</span>
                     </div>
                   ))}
                 </div>
               ))}
             </div>
             <div className="pb-summary-total"><span>Total</span><span className="pb-total-value">R$ {total.toFixed(2)}</span></div>
-            <button className="btn btn-primary btn-lg pb-cart-btn acai-btn" onClick={handleAddToCart}>
-              <ShoppingCart size={20} /> Adicionar ao carrinho
-            </button>
+            {!isUserAdmin && (
+              <button className="btn btn-primary btn-lg pb-cart-btn acai-btn" onClick={handleAddToCart}>
+                <ShoppingCart size={20} /> Adicionar ao carrinho
+              </button>
+            )}
           </div>
         </div>
+        <SuggestionsModal 
+          isOpen={isSuggestionsOpen} 
+          onClose={isEmbedded && onClose ? onClose : () => navigate('/cart')} 
+          establishment={establishment}
+          onGoToCart={() => navigate('/cart')}
+          onContinue={isEmbedded && onClose ? onClose : () => navigate(`/store/${slug}`)}
+        />
       </div>
     );
   }
@@ -219,7 +260,13 @@ export default function AcaiBuilder() {
     <div className="pb-page acai-theme">
       <div className="container pb-container">
         <div className="pb-header">
-          <Link to={`/store/${slug}`} className="pb-back-btn"><ArrowLeft size={16} /> Voltar</Link>
+          {isEmbedded ? (
+            <button onClick={onClose} className="pb-back-btn" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <ArrowLeft size={16} /> Voltar
+            </button>
+          ) : (
+            <Link to={`/store/${slug}`} className="pb-back-btn"><ArrowLeft size={16} /> Voltar</Link>
+          )}
           <div className="pb-title-row">
             <div>
               <h1 className="pb-title acai-text-gradient">Monte seu Açaí</h1>
@@ -245,18 +292,26 @@ export default function AcaiBuilder() {
           <div className="pb-step-header" style={{ borderColor: step.border, background: step.bg }}>
             <span className="pb-step-emoji-lg">{step.emoji}</span>
             <div><h2 className="pb-step-title" style={{ color: step.color }}>{step.label}</h2><p className="pb-step-sub">{step.subtitle}</p></div>
-            {!step.single && <span className="pb-multi-badge acai-badge">Múltipla seleção</span>}
+            {!step.single && (
+              <span className="pb-multi-badge acai-badge">
+                {step.max ? `Escolha até ${step.max} ${step.max === 1 ? 'opção' : 'opções'}` : 'Múltipla seleção'}
+              </span>
+            )}
           </div>
           <div className="pb-options-grid">
             {stepItems.map(product => {
               const isSelected = step.single ? selections[step.key]?.id === product.id : selections[step.key].some(i => i.id === product.id);
               return (
                 <button key={product.id} className={`pb-option ${isSelected ? 'selected' : ''}`}
-                  style={isSelected ? { borderColor: step.color, background: step.bg } : {}} onClick={() => handleSelect(step.key, product, step.single)}>
+                  style={isSelected ? { borderColor: step.color, background: step.bg } : {}} onClick={() => handleSelect(step.key, product, step.single, step.max)}>
                   {product.featured && <div className="pb-option-star"><Star size={10} fill="#FFB800" color="#FFB800" /></div>}
-                  <div className="pb-option-emoji">{ACAI_EMOJIS[product.name] || '✨'}</div>
+                  <div className="pb-option-emoji">{getEmojiByName(product.name, step.emoji)}</div>
                   <div className="pb-option-body"><span className="pb-option-name">{product.name}</span><span className="pb-option-desc">{product.description}</span></div>
-                  <div className="pb-option-price">{parseFloat(product.price) === 0 ? <span className="pb-free">Grátis</span> : `R$ ${parseFloat(product.price).toFixed(2)}`}</div>
+                  <div className="pb-option-price">
+                    {step.key === 'tamanho' 
+                      ? `R$ ${parseFloat(product.price).toFixed(2)}` 
+                      : <span className="pb-free">Grátis</span>}
+                  </div>
                 </button>
               );
             })}
@@ -266,7 +321,11 @@ export default function AcaiBuilder() {
         <div className="pb-nav">
           {currentStep > 0 ? <button className="btn btn-ghost pb-nav-btn" onClick={handleBack}><ArrowLeft size={16} /> Anterior</button> : <div />}
           <button className="btn btn-primary pb-nav-btn acai-btn" onClick={handleNext} disabled={step.single && !selections[step.key]}>
-            {currentStep < STEPS.length - 1 ? <>Próximo <ArrowRight size={16} /></> : <>Ver resumo <Check size={16} /></>}
+            {currentStep < STEPS.length - 1 ? (
+              (!step.single && selections[step.key].length === 0) ? <>Pular etapa <ArrowRight size={16} /></> : <>Próximo <ArrowRight size={16} /></>
+            ) : (
+              (!step.single && selections[step.key].length === 0) ? <>Ir sem {step.label.toLowerCase()} <Check size={16} /></> : <>Ver resumo <Check size={16} /></>
+            )}
           </button>
         </div>
       </div>
