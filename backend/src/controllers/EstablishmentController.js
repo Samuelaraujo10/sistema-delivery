@@ -128,7 +128,7 @@ class EstablishmentController {
       });
 
       if (req.file) {
-        data.logo = `/uploads/establishments/${req.file.filename}`;
+        data.logo = req.file.path;
       }
 
       const establishment = await sequelize.transaction(async (t) => {
@@ -179,7 +179,7 @@ class EstablishmentController {
       const data = normalizeEstablishmentPayload(req.body);
       
       if (req.file) {
-        data.logo = `/uploads/establishments/${req.file.filename}`;
+        data.logo = req.file.path;
       }
 
       await establishment.update(data);

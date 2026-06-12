@@ -5,16 +5,9 @@ const fs = require('fs');
 const ProductController = require('../controllers/ProductController');
 const { authMiddleware, adminMiddleware } = require('../middlewares/auth');
 
-const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'products');
-fs.mkdirSync(uploadDir, { recursive: true });
+const { createCloudinaryStorage } = require('../config/cloudinary');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`);
-  },
-});
+const storage = createCloudinaryStorage('products');
 
 const upload = multer({
   storage,

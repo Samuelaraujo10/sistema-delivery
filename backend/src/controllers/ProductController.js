@@ -123,7 +123,7 @@ class ProductController {
     try {
       const data = normalizeProductPayload(req.body);
       if (req.file) {
-        data.image = `/uploads/products/${req.file.filename}`;
+        data.image = req.file.path; // Cloudinary returns the full URL in req.file.path
       }
       
       // Força o establishmentId do admin
@@ -150,7 +150,7 @@ class ProductController {
 
       const data = normalizeProductPayload(req.body);
       if (req.file) {
-        data.image = `/uploads/products/${req.file.filename}`;
+        data.image = req.file.path;
       }
 
       await product.update(data);
