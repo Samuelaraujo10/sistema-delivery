@@ -19,7 +19,14 @@ app.use(helmet({
 }));
 app.use(morgan('dev'));
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Permite requisições sem origin (ex: Postman), localhost e qualquer domínio Vercel
+    if (!origin || origin === 'http://localhost:5173' || origin.endsWith('.vercel.app') || origin === process.env.FRONTEND_URL) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json());
