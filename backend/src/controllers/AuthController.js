@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { User, Establishment } = require('../models');
+const { sendVerificationEmail } = require('../services/emailService');
 
 class AuthController {
   async register(req, res) {
@@ -15,12 +17,15 @@ class AuthController {
         return res.status(400).json({ success: false, message: 'E-mail já cadastrado' });
       }
 
-      const user = await User.create({ name, email, password, phone });
-      const token = jwt.sign({ id: user.id, role: user.role, establishmentId: user.establishmentId }, process.env.JWT_SECRET, { expiresIn: '7d' });
+      const verificationToken = crypto.randomBytes(32).toString('hex');
+      const user = await User.create({ name, email, password, phone, verificationToken });
+
+      // Envia o e-mail de verificação
+      await sendVerificationEmail(user.email, user.name, verificationToken);
 
       return res.status(201).json({
         success: true,
-        data: { token, user: { id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, establishmentId: user.establishmentId, address: user.address } },
+        message: 'Cadastro realizado com sucesso! Verifique sua caixa de entrada para ativar a conta.',
       });
     } catch (error) {
       return res.status(400).json({ success: false, message: error.message });
@@ -37,6 +42,11 @@ class AuthController {
       });
       if (!user || !(await user.validatePassword(password))) {
         return res.status(401).json({ success: false, message: 'E-mail ou senha inválidos' });
+      }
+
+      // Bloqueia login se não tiver verificado o e-mail (para usuários novos que têm verificationToken preenchido)
+      if (user.isEmailVerified === false && user.verificationToken !== null) {
+        return res.status(403).json({ success: false, message: 'Sua conta ainda não foi ativada. Por favor, verifique sua caixa de e-mail.' });
       }
 
       const token = jwt.sign({ id: user.id, role: user.role, establishmentId: user.establishmentId }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -116,6 +126,28 @@ class AuthController {
       });
     } catch (error) {
       return res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  async verifyEmail(req, res) {
+    try {
+      const { token } = req.query;
+      if (!token) {
+        return res.status(400).json({ success: false, message: 'Link de verificação inválido.' });
+      }
+
+      const user = await User.findOne({ where: { verificationToken: token } });
+      if (!user) {
+        return res.status(400).json({ success: false, message: 'Token de ativação inválido ou já utilizado.' });
+      }
+
+      user.isEmailVerified = true;
+      user.verificationToken = null;
+      await user.save();
+
+      return res.json({ success: true, message: 'Conta ativada com sucesso! Você já pode fazer login.' });
+    } catch (error) {
+      return res.status(500).json({ success: false, message: error.message });
     }
   }
 }

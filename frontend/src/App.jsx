@@ -9,6 +9,7 @@ const StorePage = React.lazy(() => import('./pages/StorePage'));
 const CartPage = React.lazy(() => import('./pages/CartPage'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage'));
 const RegisterPage = React.lazy(() => import('./pages/RegisterPage'));
+const VerifyEmailPage = React.lazy(() => import('./pages/VerifyEmailPage'));
 const OrderTrackingPage = React.lazy(() => import('./pages/OrderTrackingPage'));
 const PastaBuilder = React.lazy(() => import('./pages/PastaBuilder'));
 const AcaiBuilder = React.lazy(() => import('./pages/AcaiBuilder'));
@@ -69,6 +70,7 @@ export default function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/order/:id" element={<OrderTrackingPage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/profile" element={<ProfilePage />} />

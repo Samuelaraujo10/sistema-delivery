@@ -23,9 +23,8 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const { data } = await authAPI.register(form);
-      login(data.data.user, data.data.token);
-      toast.success('Conta criada com sucesso! 🎉');
-      navigate('/');
+      toast.success('Quase lá! Verifique sua caixa de e-mail para ativar a conta.', { duration: 6000 });
+      navigate('/login');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Erro ao criar conta');
     } finally {
