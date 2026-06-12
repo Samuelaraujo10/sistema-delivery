@@ -57,11 +57,6 @@ export default function LoginPage() {
         <h1 className="auth-title">Entrar na conta</h1>
         <p className="auth-subtitle">Acesse para acompanhar seus pedidos</p>
 
-        <div className="auth-demo-hint" style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem', padding: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', margin: '12px 0' }}>
-          <div><strong>Demo Cliente:</strong> joao@email.com / 123456</div>
-          <div><strong>Demo Lojista:</strong> rafa@delivery.com / admin</div>
-        </div>
-
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label className="form-label">E-mail</label>
