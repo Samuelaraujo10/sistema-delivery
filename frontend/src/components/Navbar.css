@@ -233,6 +233,7 @@
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    font-size: 1.1rem;
   }
 
   .navbar-links {
