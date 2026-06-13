@@ -205,8 +205,10 @@
   color: var(--text);
 }
 
-.mobile-only {
-  display: none !important;
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
 }
 
 @media (max-width: 768px) {
