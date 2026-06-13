@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:20
 
 # Cria a pasta de trabalho
 WORKDIR /app
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY backend/package*.json ./backend/
 
 # Instala as dependências do backend
-RUN cd backend && npm install --production
+RUN cd backend && rm -f package-lock.json && npm install
 
 # Copia todo o código do backend
 COPY backend ./backend/
