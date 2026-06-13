@@ -218,6 +218,10 @@
     text-align: center;
     gap: 24px;
   }
+  
+  .builder-promo-text h3 {
+    justify-content: center;
+  }
 }
 
 /* Category Tabs */
