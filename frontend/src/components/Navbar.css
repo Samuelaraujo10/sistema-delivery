@@ -224,6 +224,17 @@
     display: flex;
   }
 
+  .navbar-inner {
+    position: relative;
+    justify-content: space-between;
+  }
+
+  .navbar-logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
   .navbar-links {
     position: fixed;
     top: 0;
@@ -424,10 +435,6 @@
 }
 
 @media (max-width: 480px) {
-  .navbar-logo > span {
-    display: none;
-  }
-  
   .user-btn > span:not(.user-role-badge) {
     display: none;
   }
