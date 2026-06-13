@@ -41,15 +41,55 @@ export default function Navbar() {
         </Link>
 
         <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
+          <div className="mobile-menu-header mobile-only">
+            <h3>Menu</h3>
+            <button className="menu-close" onClick={() => setMenuOpen(false)}><X size={24} /></button>
+          </div>
+          
+          {user && (
+            <div className="mobile-user-info mobile-only">
+              <div className="mobile-user-avatar"><User size={24} /></div>
+              <div className="mobile-user-text">
+                <strong>{user.name.split(' ')[0]}</strong>
+                <span>{user.email}</span>
+              </div>
+            </div>
+          )}
+
           {user?.role !== 'admin' && (
             <Link to="/" className={location.pathname === '/' ? 'active' : ''} onClick={() => setMenuOpen(false)}>
               Início
             </Link>
           )}
+
+          {user?.role === 'admin' && (
+            <Link to="/admin" className={`mobile-only ${location.pathname === '/admin' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
+              Painel Admin
+            </Link>
+          )}
+
           {user && user.role !== 'admin' && (
             <Link to="/orders" className={location.pathname === '/orders' ? 'active' : ''} onClick={() => setMenuOpen(false)}>
-              Pedidos
+              Meus Pedidos
             </Link>
+          )}
+
+          {user && !user.establishmentId && (
+            <Link to="/profile" className={`mobile-only ${location.pathname === '/profile' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
+              Meus Dados
+            </Link>
+          )}
+
+          {!user && (
+            <Link to="/login" className="mobile-only btn btn-primary mt-4" onClick={() => setMenuOpen(false)}>
+              Entrar / Criar Conta
+            </Link>
+          )}
+
+          {user && (
+            <button className="mobile-only mobile-logout-btn" onClick={() => { logout(); setMenuOpen(false); }}>
+              Sair da conta
+            </button>
           )}
         </div>
 
@@ -63,7 +103,7 @@ export default function Navbar() {
 
           {user ? (
             <div 
-              className="user-menu" 
+              className="user-menu desktop-only" 
               onMouseEnter={handleMouseEnter} 
               onMouseLeave={handleMouseLeave}
             >
@@ -108,7 +148,7 @@ export default function Navbar() {
               </div>
             </div>
           ) : (
-            <Link to="/login" className="btn btn-primary btn-sm">
+            <Link to="/login" className="btn btn-primary btn-sm desktop-only">
               Entrar
             </Link>
           )}

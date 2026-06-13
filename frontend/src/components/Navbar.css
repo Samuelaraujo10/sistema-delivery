@@ -195,34 +195,116 @@
   color: var(--text);
 }
 
+.mobile-only {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: flex;
+  }
+
   .menu-toggle {
     display: flex;
   }
 
   .navbar-links {
     position: fixed;
-    top: 70px;
-    left: 0;
+    top: 0;
     right: 0;
-    background: var(--bg-card);
-    border-bottom: 1px solid var(--border);
+    bottom: 0;
+    width: 280px;
+    height: 100vh;
+    background: var(--bg-elevated);
+    border-left: 1px solid var(--border);
     flex-direction: column;
     align-items: stretch;
-    padding: 16px;
-    gap: 4px;
-    transform: translateY(-110%);
-    transition: transform var(--transition);
+    padding: 24px;
+    gap: 12px;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
+    z-index: 2000;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
   }
 
   .navbar-links.open {
-    transform: translateY(0);
+    transform: translateX(0);
     pointer-events: all;
   }
 
   .navbar-links a {
     padding: 14px 16px;
+    font-size: 1rem;
+  }
+  
+  .mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .mobile-menu-header h3 {
+    font-size: 1.2rem;
+    color: var(--text);
+  }
+  
+  .menu-close {
+    background: none;
+    color: var(--text-muted);
+  }
+  
+  .mobile-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+  }
+  
+  .mobile-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+  
+  .mobile-user-text {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .mobile-user-text strong {
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  
+  .mobile-user-text span {
+    font-size: 0.75rem;
+    color: var(--text-subtle);
+  }
+  
+  .mobile-logout-btn {
+    margin-top: auto;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 68, 68, 0.1);
+    color: var(--danger);
+    font-weight: 600;
+    text-align: center;
   }
 }
 
