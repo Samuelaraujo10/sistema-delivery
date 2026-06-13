@@ -530,6 +530,14 @@
     text-align: center;
   }
 
+  .pb-title-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+
   .pb-running-total {
     width: 100%;
     flex-direction: row;

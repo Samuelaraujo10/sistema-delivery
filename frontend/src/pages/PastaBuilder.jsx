@@ -321,7 +321,7 @@ export default function PastaBuilder({ isEmbedded = false, onClose = null, embed
             </Link>
           )}
           <div className="pb-title-row">
-            <div>
+            <div className="pb-title-content">
               <h1 className="pb-title">Monte sua massa</h1>
               <p className="pb-subtitle">
                 {establishment?.name} · {STEPS.filter(s => s.single ? !!selections[s.key] : selections.topping.length > 0).length} de {STEPS.length - 1} obrigatórios
