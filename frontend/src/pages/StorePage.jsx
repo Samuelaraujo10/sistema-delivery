@@ -20,7 +20,7 @@ import PizzaBuilder from './PizzaBuilder';
 import PastaBuilder from './PastaBuilder';
 import { getReadableColor } from '../utils/colorUtils';
 import MenuManagement from './MenuManagement';
-
+import ReviewsList from '../components/ReviewsList';
 
 export default function StorePage() {
   const { slug } = useParams();
@@ -29,6 +29,7 @@ export default function StorePage() {
   const [activeCategory, setActiveCategory] = useState(null);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [adminTab, setAdminTab] = useState('store'); // 'store', 'menu', 'orders', 'settings'
+  const [storeTab, setStoreTab] = useState('menu'); // 'menu' | 'reviews'
   const [activeBuilder, setActiveBuilder] = useState(null); // 'acai' | 'pizza' | 'massa' | null
   const [orders, setOrders] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -548,8 +549,32 @@ export default function StorePage() {
               </div>
             )}
 
-            {/* Category tabs */}
-            {displayCategories.length > 0 && (
+            {/* Main Tabs (Menu vs Reviews) */}
+            <div className="store-main-tabs" style={{ display: 'flex', gap: '16px', marginBottom: '24px', borderBottom: '1px solid var(--border)', paddingBottom: '8px' }}>
+              <button 
+                className={`store-main-tab ${storeTab === 'menu' ? 'active' : ''}`}
+                onClick={() => setStoreTab('menu')}
+                style={{ background: 'none', border: 'none', fontSize: '1.1rem', fontWeight: storeTab === 'menu' ? '800' : '600', color: storeTab === 'menu' ? 'var(--text)' : 'var(--text-muted)', cursor: 'pointer', borderBottom: storeTab === 'menu' ? `3px solid ${primaryColor}` : '3px solid transparent', paddingBottom: '8px' }}
+              >
+                Cardápio
+              </button>
+              <button 
+                className={`store-main-tab ${storeTab === 'reviews' ? 'active' : ''}`}
+                onClick={() => setStoreTab('reviews')}
+                style={{ background: 'none', border: 'none', fontSize: '1.1rem', fontWeight: storeTab === 'reviews' ? '800' : '600', color: storeTab === 'reviews' ? 'var(--text)' : 'var(--text-muted)', cursor: 'pointer', borderBottom: storeTab === 'reviews' ? `3px solid ${primaryColor}` : '3px solid transparent', paddingBottom: '8px' }}
+              >
+                Avaliações
+              </button>
+            </div>
+
+            {storeTab === 'reviews' && (
+              <ReviewsList establishmentId={establishment.id} />
+            )}
+
+            {storeTab === 'menu' && (
+              <>
+                {/* Category tabs */}
+                {displayCategories.length > 0 && (
               <>
                 {/* Menu sub-tab toggle */}
                 <div className="menu-subtab" style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
@@ -615,6 +640,8 @@ export default function StorePage() {
                   ))}
                 </div>
               </div>
+            )}
+            </>
             )}
           </div>
         </>

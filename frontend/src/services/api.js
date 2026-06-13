@@ -81,6 +81,12 @@ export const ordersAPI = {
   notifyPix: (id) => api.post(`/orders/${id}/notify-pix`),
 };
 
+export const reviewsAPI = {
+  create: (data) => api.post('/reviews', data),
+  getByEstablishment: (id) => api.get(`/reviews/establishment/${id}`),
+  getByProduct: (id) => api.get(`/reviews/product/${id}`)
+};
+
 export const authAPI = {
   login: (data) => api.post('/auth/login', data),
   register: (data) => api.post('/auth/register', data),

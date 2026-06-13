@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ordersAPI } from '../services/api';
-import { Clock, Calendar, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Star, Clock, Calendar, ShoppingBag, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ReviewFormModal from '../components/ReviewFormModal';
 import './OrdersPage.css';
 
 const formatDate = (dateStr) => {
@@ -38,6 +39,8 @@ const getStatusBadge = (status) => {
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [orderToReview, setOrderToReview] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -83,6 +86,11 @@ export default function OrdersPage() {
 
   const activeOrders = orders.filter(o => ['pending', 'confirmed', 'preparing', 'delivering'].includes(o.status));
   const pastOrders = orders.filter(o => ['delivered', 'cancelled'].includes(o.status));
+
+  const handleReviewClick = (order) => {
+    setOrderToReview(order);
+    setReviewModalOpen(true);
+  };
 
   return (
     <div className="page">
@@ -156,6 +164,15 @@ export default function OrdersPage() {
                     </div>
 
                     <div className="order-card-actions">
+                      {order.status === 'delivered' && (
+                        <button 
+                          className="btn btn-secondary btn-sm" 
+                          onClick={() => handleReviewClick(order)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          <Star size={14} /> Avaliar
+                        </button>
+                      )}
                       <Link to={`/order/${order.id}`} className="btn btn-ghost btn-sm">
                         Ver detalhes
                       </Link>
@@ -167,6 +184,16 @@ export default function OrdersPage() {
           </section>
         )}
       </div>
+
+      <ReviewFormModal
+        isOpen={reviewModalOpen}
+        onClose={() => {
+          setReviewModalOpen(false);
+          setOrderToReview(null);
+        }}
+        order={orderToReview}
+        // onSuccess={(review) => {}} -> could update local state if needed
+      />
     </div>
   );
 }
