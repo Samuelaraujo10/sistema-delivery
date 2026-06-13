@@ -14,9 +14,13 @@ const validateEnv = () => {
     return envSchema.parse(process.env);
   } catch (err) {
     console.error('❌ Erro nas variáveis de ambiente:');
-    err.errors.forEach(e => {
-      console.error(`   - ${e.path.join('.')}: ${e.message}`);
-    });
+    if (err.errors && Array.isArray(err.errors)) {
+      err.errors.forEach(e => {
+        console.error(`   - ${e.path.join('.')}: ${e.message}`);
+      });
+    } else {
+      console.error(err);
+    }
     process.exit(1);
   }
 };
