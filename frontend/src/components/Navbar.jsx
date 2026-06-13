@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Zap, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, Zap, Menu, X, Home, LayoutDashboard, ListOrdered, Settings, LogOut, LogIn } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
@@ -57,38 +57,38 @@ export default function Navbar() {
           )}
 
           {user?.role !== 'admin' && (
-            <Link to="/" className={location.pathname === '/' ? 'active' : ''} onClick={() => setMenuOpen(false)}>
-              Início
+            <Link to="/" className={`menu-btn-home ${location.pathname === '/' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
+              <Home size={18} /> <span>Início</span>
             </Link>
           )}
 
           {user?.role === 'admin' && (
-            <Link to="/admin" className={`mobile-only ${location.pathname === '/admin' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
-              Painel Admin
+            <Link to="/admin" className={`mobile-only menu-btn-admin ${location.pathname === '/admin' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
+              <LayoutDashboard size={18} /> <span>Painel Admin</span>
             </Link>
           )}
 
           {user && user.role !== 'admin' && (
-            <Link to="/orders" className={location.pathname === '/orders' ? 'active' : ''} onClick={() => setMenuOpen(false)}>
-              Meus Pedidos
+            <Link to="/orders" className={`menu-btn-orders ${location.pathname === '/orders' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
+              <ListOrdered size={18} /> <span>Meus Pedidos</span>
             </Link>
           )}
 
           {user && !user.establishmentId && (
-            <Link to="/profile" className={`mobile-only ${location.pathname === '/profile' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
-              Meus Dados
+            <Link to="/profile" className={`mobile-only menu-btn-profile ${location.pathname === '/profile' ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
+              <Settings size={18} /> <span>Meus Dados</span>
             </Link>
           )}
 
           {!user && (
-            <Link to="/login" className="mobile-only btn btn-primary mt-4" onClick={() => setMenuOpen(false)}>
-              Entrar / Criar Conta
+            <Link to="/login" className="mobile-only menu-btn-login btn btn-primary mt-4" onClick={() => setMenuOpen(false)}>
+              <LogIn size={18} /> <span>Entrar / Criar Conta</span>
             </Link>
           )}
 
           {user && (
             <button className="mobile-only mobile-logout-btn" onClick={() => { logout(); setMenuOpen(false); }}>
-              Sair da conta
+              <LogOut size={18} /> <span>Sair da conta</span>
             </button>
           )}
         </div>
