@@ -45,7 +45,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() 
 app.use(errorHandler);
 
 // Inicializar banco e servidor
-sequelize.sync().then(async () => {
+sequelize.sync({ alter: true }).then(async () => {
   console.log('✅ Banco de dados sincronizado');
   const { seedDatabase } = require('./database/seeders');
   await seedDatabase();
