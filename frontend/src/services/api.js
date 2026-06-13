@@ -1,7 +1,14 @@
 import axios from 'axios';
 
+let finalBaseUrl = '/api';
+if (import.meta.env.VITE_API_URL) {
+  // Remove barra final se existir e garante que o /api está presente
+  const cleanUrl = import.meta.env.VITE_API_URL.replace(/\/$/, '');
+  finalBaseUrl = cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: finalBaseUrl,
 });
 
 // Interceptor para token
