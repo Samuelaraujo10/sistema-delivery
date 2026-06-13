@@ -239,7 +239,19 @@
 
   .navbar-links a {
     padding: 14px 16px;
-    font-size: 1rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .navbar-links a:hover,
+  .navbar-links a.active {
+    background: rgba(255, 107, 53, 0.1);
+    color: var(--primary);
+    border-color: rgba(255, 107, 53, 0.3);
   }
   
   .mobile-menu-header {
