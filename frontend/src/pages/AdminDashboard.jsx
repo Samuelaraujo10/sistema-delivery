@@ -687,13 +687,12 @@ const AdminDashboard = () => {
               <div className="form-section-title">Credenciais de Acesso</div>
               <div className="form-grid">
                 <div className="form-group">
-                  <label>E-mail de Login {editingEstablishment && '(Não editável)'}</label>
+                  <label>E-mail de Login {editingEstablishment && '(Preencha apenas para alterar)'}</label>
                   <input 
                     type="email" 
                     value={estFormData.email} 
                     onChange={e => setEstFormData({ ...estFormData, email: e.target.value })} 
                     required={!editingEstablishment} 
-                    disabled={!!editingEstablishment}
                     placeholder="admin@sualoja.com"
                   />
                 </div>

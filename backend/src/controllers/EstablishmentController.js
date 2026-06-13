@@ -182,7 +182,38 @@ class EstablishmentController {
         data.logo = req.file.path;
       }
 
-      await establishment.update(data);
+      await sequelize.transaction(async (t) => {
+        await establishment.update(data, { transaction: t });
+
+        // Se enviou email ou senha, tenta atualizar o usuário admin dono da loja
+        if (req.body.email || req.body.password) {
+          const adminUser = await User.findOne({ where: { establishmentId: id, role: 'admin' }, transaction: t });
+          
+          if (adminUser) {
+            if (req.body.email && req.body.email !== adminUser.email) {
+              const existingEmail = await User.findOne({ where: { email: req.body.email }, transaction: t });
+              if (existingEmail) {
+                throw new Error('O e-mail fornecido já está em uso por outro usuário.');
+              }
+              adminUser.email = req.body.email;
+            }
+            if (req.body.password) {
+              adminUser.password = req.body.password;
+            }
+            await adminUser.save({ transaction: t });
+          } else if (req.body.email && req.body.password) {
+            // Se a loja não tinha usuário, cria um
+            await User.create({
+              name: establishment.name || 'Admin',
+              email: req.body.email,
+              password: req.body.password,
+              role: 'admin',
+              establishmentId: id,
+              phone: req.body.phone || ''
+            }, { transaction: t });
+          }
+        }
+      });
       return res.json({ success: true, data: establishment });
     } catch (error) {
       return res.status(400).json({ success: false, message: error.message });
