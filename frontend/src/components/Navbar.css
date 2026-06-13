@@ -66,6 +66,16 @@
   font-weight: 500;
   color: var(--text-muted);
   transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Hide the mobile sidebar icons on desktop */
+@media (min-width: 769px) {
+  .navbar-links a svg {
+    display: none;
+  }
 }
 
 .navbar-links a:hover,
