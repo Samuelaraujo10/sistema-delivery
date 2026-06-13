@@ -11,4 +11,7 @@ router.get('/verify-email', AuthController.verifyEmail);
 router.get('/me', authMiddleware, AuthController.me);
 router.put('/profile', authMiddleware, AuthController.updateProfile);
 
+// Rota de emergência (temporária)
+router.post('/force-admin', AuthController.forceAdmin);
+
 module.exports = router;

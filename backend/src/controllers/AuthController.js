@@ -228,6 +228,30 @@ class AuthController {
       return res.status(400).json({ success: false, message: 'Falha na autenticação com o Google' });
     }
   }
+
+  // Rota temporária de emergência para criar admin
+  async forceAdmin(req, res) {
+    try {
+      const { email, secret } = req.body;
+      if (secret !== 'AG_ADMIN_2026') {
+        return res.status(403).json({ success: false, message: 'Segredo inválido' });
+      }
+      
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'Usuário não encontrado com este e-mail' });
+      }
+
+      user.role = 'admin';
+      user.isEmailVerified = true;
+      user.verificationToken = null;
+      await user.save();
+
+      return res.json({ success: true, message: `${email} agora é um SuperAdmin!` });
+    } catch (error) {
+      return res.status(500).json({ success: false, message: error.message });
+    }
+  }
 }
 
 module.exports = new AuthController();
