@@ -252,3 +252,17 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+@media (max-width: 480px) {
+  .navbar-logo > span {
+    display: none;
+  }
+  
+  .user-btn > span:not(.user-role-badge) {
+    display: none;
+  }
+  
+  .navbar-actions {
+    gap: 8px;
+  }
+}
