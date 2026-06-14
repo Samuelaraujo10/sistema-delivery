@@ -433,16 +433,7 @@ export default function StorePage() {
                 <Palette size={18} /> Ajustes
               </button>
             </div>
-            {adminTab === 'menu' && (
-              <div className="admin-actions-group">
-                <button 
-                  className="admin-quick-add"
-                  onClick={() => { setEditingProduct(null); setIsFormOpen(true); }}
-                >
-                  <Plus size={16} /> Novo Produto
-                </button>
-              </div>
-            )}
+
           </div>
         </div>
       )}
