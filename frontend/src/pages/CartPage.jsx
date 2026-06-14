@@ -37,10 +37,47 @@ export default function CartPage() {
   const [complement, setComplement] = useState('');
   const [city, setCity] = useState('');
   const [reference, setReference] = useState('');
+  const [cep, setCep] = useState('');
+  const [uf, setUf] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('pix');
   const [changeFor, setChangeFor] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const fetchAddressByCep = async (cepValue) => {
+    const cleanCep = cepValue.replace(/\D/g, '');
+    if (cleanCep.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+        const data = await response.json();
+        if (!data.erro) {
+          if (data.logradouro) setStreet(data.logradouro);
+          if (data.bairro) setNeighborhood(data.bairro);
+          if (data.localidade) setCity(data.localidade);
+          if (data.uf) setUf(data.uf);
+          toast.success('Endereço encontrado pelo CEP!');
+        } else {
+          toast.error('CEP não encontrado');
+        }
+      } catch (error) {
+        toast.error('Erro ao buscar o CEP');
+      }
+    }
+  };
+
+  const handleCepChange = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 8) value = value.slice(0, 8);
+    let formattedCep = value;
+    if (value.length > 5) {
+      formattedCep = value.slice(0, 5) + '-' + value.slice(5);
+    }
+    setCep(formattedCep);
+    
+    if (value.length === 8) {
+      fetchAddressByCep(value);
+    }
+  };
 
   useEffect(() => {
     if (user && user.role === 'admin') {
@@ -60,6 +97,8 @@ export default function CartPage() {
           setComplement(addr.complement || '');
           setCity(addr.city || '');
           setReference(addr.reference || '');
+          setCep(addr.cep || '');
+          setUf(addr.uf || '');
         }
       } catch (e) {
         // Fallback for plain string formats
@@ -109,6 +148,14 @@ export default function CartPage() {
       toast.error('Informe a cidade do endereço de entrega');
       return;
     }
+    if (!cep.trim() || cep.length < 9) {
+      toast.error('Informe um CEP válido');
+      return;
+    }
+    if (!uf.trim()) {
+      toast.error('Informe o estado (UF) do endereço de entrega');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -154,6 +201,8 @@ export default function CartPage() {
         neighborhood: neighborhood.trim(),
         complement: complement.trim(),
         city: city.trim(),
+        state: uf.trim(),
+        cep: cep.trim(),
         reference: reference.trim()
       };
 
@@ -163,6 +212,8 @@ export default function CartPage() {
         `Bairro: ${addressObj.neighborhood}`,
         addressObj.complement ? `Compl: ${addressObj.complement}` : '',
         `Cidade: ${addressObj.city}`,
+        `UF: ${addressObj.state}`,
+        `CEP: ${addressObj.cep}`,
         addressObj.reference ? `Ref: ${addressObj.reference}` : ''
       ].filter(Boolean).join(', ');
   
@@ -288,6 +339,26 @@ export default function CartPage() {
                 <MapPin size={15} /> Endereço de entrega
               </label>
               <div className="address-grid">
+                <div className="col-3">
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="CEP *"
+                    value={cep}
+                    onChange={handleCepChange}
+                    required
+                  />
+                </div>
+                <div className="col-1">
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="UF *"
+                    value={uf}
+                    onChange={(e) => setUf(e.target.value.toUpperCase().slice(0, 2))}
+                    required
+                  />
+                </div>
                 <div className="col-3">
                   <input
                     type="text"

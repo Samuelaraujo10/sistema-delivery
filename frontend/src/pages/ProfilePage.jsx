@@ -26,8 +26,45 @@ export default function ProfilePage() {
   const [complement, setComplement] = useState('');
   const [city, setCity] = useState('');
   const [reference, setReference] = useState('');
+  const [cep, setCep] = useState('');
+  const [uf, setUf] = useState('');
 
   const [loading, setLoading] = useState(false);
+
+  const fetchAddressByCep = async (cepValue) => {
+    const cleanCep = cepValue.replace(/\D/g, '');
+    if (cleanCep.length === 8) {
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+        const data = await response.json();
+        if (!data.erro) {
+          if (data.logradouro) setStreet(data.logradouro);
+          if (data.bairro) setNeighborhood(data.bairro);
+          if (data.localidade) setCity(data.localidade);
+          if (data.uf) setUf(data.uf);
+          toast.success('Endereço encontrado pelo CEP!');
+        } else {
+          toast.error('CEP não encontrado');
+        }
+      } catch (error) {
+        toast.error('Erro ao buscar o CEP');
+      }
+    }
+  };
+
+  const handleCepChange = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 8) value = value.slice(0, 8);
+    let formattedCep = value;
+    if (value.length > 5) {
+      formattedCep = value.slice(0, 5) + '-' + value.slice(5);
+    }
+    setCep(formattedCep);
+    
+    if (value.length === 8) {
+      fetchAddressByCep(value);
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -55,6 +92,8 @@ export default function ProfilePage() {
           setComplement(addr.complement || '');
           setCity(addr.city || '');
           setReference(addr.reference || '');
+          setCep(addr.cep || '');
+          setUf(addr.uf || '');
         }
       } catch (e) {
         setStreet(user.address);
@@ -97,6 +136,8 @@ export default function ProfilePage() {
         neighborhood: neighborhood.trim(),
         complement: complement.trim(),
         city: city.trim(),
+        state: uf.trim(),
+        cep: cep.trim(),
         reference: reference.trim()
       };
 
@@ -224,6 +265,26 @@ export default function ProfilePage() {
               <MapPin size={18} /> Endereço Padrão de Entrega
             </h2>
             <div className="card-section-body address-grid">
+              <div className="col-3">
+                <label className="form-label">CEP</label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="00000-000"
+                  value={cep}
+                  onChange={handleCepChange}
+                />
+              </div>
+              <div className="col-1">
+                <label className="form-label">UF</label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="UF"
+                  value={uf}
+                  onChange={(e) => setUf(e.target.value.toUpperCase().slice(0, 2))}
+                />
+              </div>
               <div className="col-3">
                 <label className="form-label">Rua / Avenida</label>
                 <input
