@@ -546,7 +546,7 @@ body.light-mode .modal-content {
   color: #94A3B8;
 }
 
-.admin-form-flat .form-group label {
+.admin-form-flat .form-group label:not(.toggle-switch-label) {
   color: #94A3B8;
   font-weight: 600;
   font-size: 0.85rem;
