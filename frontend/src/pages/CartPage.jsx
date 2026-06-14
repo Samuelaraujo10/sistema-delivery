@@ -4,8 +4,21 @@ import { ShoppingBag, Minus, Plus, Trash2, ArrowLeft, MapPin, CreditCard, Bankno
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
 import { ordersAPI } from '../services/api';
+import { getEmojiByName, isImageEmoji } from '../utils/emojiMap';
 import toast from 'react-hot-toast';
 import './CartPage.css';
+
+const typeEmoji = {
+  acai: '🍇',
+  pizza: '🍕',
+  burger: '🍔',
+  sushi: '🍱',
+  pasta: '🍝',
+  mexican: '🌮',
+  chinese: '🥡',
+  bakery: '🍞',
+  other: '🍽️'
+};
 
 const PAYMENT_METHODS = [
   { key: 'pix', label: 'Pix', icon: Smartphone },
@@ -203,11 +216,15 @@ export default function CartPage() {
             {items.map(item => (
               <div key={item.cartId} className="cart-item fade-in">
                 <div className="cart-item-emoji">
-                  {establishment?.type === 'acai' ? '🍇' :
-                   establishment?.type === 'pizza' ? '🍕' :
-                   establishment?.type === 'burger' ? '🍔' :
-                   establishment?.type === 'bebida' ? '🥤' :
-                   establishment?.type === 'massa' ? '🍝' : '🍽️'} 
+                  {(() => {
+                    const fallback = typeEmoji[establishment?.type] || '🍽️';
+                    const emoji = getEmojiByName(item.name, fallback);
+                    return isImageEmoji(emoji) ? (
+                      <img src={emoji} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    ) : (
+                      emoji
+                    );
+                  })()}
                 </div>
                 <div className="cart-item-info">
                   <h4>{item.name}</h4>
