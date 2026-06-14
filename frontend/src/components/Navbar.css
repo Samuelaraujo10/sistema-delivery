@@ -260,6 +260,7 @@
   .navbar-links a, .mobile-logout-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 12px;
     padding: 14px 16px;
     font-size: 1.05rem;
@@ -272,7 +273,7 @@
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
-    text-align: left;
+    text-align: center;
     width: 100%;
   }
 

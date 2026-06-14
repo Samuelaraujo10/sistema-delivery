@@ -310,6 +310,7 @@
     padding-bottom: 8px;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    justify-content: center;
   }
 
   .filter-pills::-webkit-scrollbar { display: none; }

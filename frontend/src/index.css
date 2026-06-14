@@ -115,6 +115,12 @@ img {
   padding: 0 20px;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+}
+
 .page {
   min-height: calc(100vh - 70px);
   padding-top: 90px;
