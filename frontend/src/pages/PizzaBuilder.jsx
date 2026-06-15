@@ -194,7 +194,7 @@ export default function PizzaBuilder({ isEmbedded = false, onClose = null, embed
                 <div className="pb-summary-row-left">
                   <span className="pb-summary-emoji">
                     {isImageEmoji(getEmojiByName(tamanho.name, '📏'))
-                      ? <img src={getEmojiByName(tamanho.name, '📏')} alt={tamanho.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                      ? <img src={getEmojiByName(tamanho.name, '📏')} alt={tamanho.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
                       : getEmojiByName(tamanho.name, '📏')}
                   </span>
                   <div><span className="pb-summary-cat" style={{color: '#EF4444'}}>Tamanho</span><span className="pb-summary-name">{tamanho.name}</span></div>
@@ -210,7 +210,7 @@ export default function PizzaBuilder({ isEmbedded = false, onClose = null, embed
                       <div className="pb-summary-row-left">
                         <span className="pb-summary-emoji">
                           {isImageEmoji(getEmojiByName(s.name, '🍕'))
-                            ? <img src={getEmojiByName(s.name, '🍕')} alt={s.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                            ? <img src={getEmojiByName(s.name, '🍕')} alt={s.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
                             : getEmojiByName(s.name, '🍕')}
                         </span>
                         <span className="pb-summary-name">{s.name}</span>
@@ -231,7 +231,7 @@ export default function PizzaBuilder({ isEmbedded = false, onClose = null, embed
                   <div className="pb-summary-row-left">
                     <span className="pb-summary-emoji">
                       {isImageEmoji(getEmojiByName(borda.name, '🥯'))
-                        ? <img src={getEmojiByName(borda.name, '🥯')} alt={borda.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                        ? <img src={getEmojiByName(borda.name, '🥯')} alt={borda.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
                         : getEmojiByName(borda.name, '🥯')}
                     </span>
                     <div><span className="pb-summary-cat" style={{color: '#10B981'}}>Borda</span><span className="pb-summary-name">{borda.name}</span></div>
@@ -309,7 +309,7 @@ export default function PizzaBuilder({ isEmbedded = false, onClose = null, embed
                   {product.featured && <div className="pb-option-star"><Star size={10} fill="#FFB800" color="#FFB800" /></div>}
                   <div className="pb-option-emoji">
                     {isImageEmoji(getEmojiByName(product.name, step.emoji))
-                      ? <img src={getEmojiByName(product.name, step.emoji)} alt={product.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                      ? <img src={getEmojiByName(product.name, step.emoji)} alt={product.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
                       : getEmojiByName(product.name, step.emoji)}
                   </div>
                   <div className="pb-option-body"><span className="pb-option-name">{product.name}</span><span className="pb-option-desc">{product.description}</span></div>

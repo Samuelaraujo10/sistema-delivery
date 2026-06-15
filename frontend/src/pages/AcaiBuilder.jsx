@@ -230,7 +230,7 @@ export default function AcaiBuilder({ isEmbedded = false, onClose = null, embedd
                       <div className="pb-summary-row-left">
                         <span className="pb-summary-emoji">
                           {isImageEmoji(getEmojiByName(item.name, '✨'))
-                            ? <img src={getEmojiByName(item.name, '✨')} alt={item.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                            ? <img src={getEmojiByName(item.name, '✨')} alt={item.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
                             : getEmojiByName(item.name, '✨')}
                         </span>
                         <span className="pb-summary-name">{item.name}</span>
@@ -311,7 +311,7 @@ export default function AcaiBuilder({ isEmbedded = false, onClose = null, embedd
                   {product.featured && <div className="pb-option-star"><Star size={10} fill="#FFB800" color="#FFB800" /></div>}
                   <div className="pb-option-emoji">
                     {isImageEmoji(getEmojiByName(product.name, step.emoji))
-                      ? <img src={getEmojiByName(product.name, step.emoji)} alt={product.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                      ? <img src={getEmojiByName(product.name, step.emoji)} alt={product.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
                       : getEmojiByName(product.name, step.emoji)}
                   </div>
                   <div className="pb-option-body"><span className="pb-option-name">{product.name}</span><span className="pb-option-desc">{product.description}</span></div>

@@ -252,7 +252,7 @@ export default function PastaBuilder({ isEmbedded = false, onClose = null, embed
                   <div className="pb-summary-row-left">
                     <span className="pb-summary-emoji">
                       {isImageEmoji(getEmojiByName(item.name, emoji)) 
-                        ? <img src={getEmojiByName(item.name, emoji)} alt={item.name} style={{width:'100%', height:'100%', objectFit:'contain'}} /> 
+                        ? <img src={getEmojiByName(item.name, emoji)} alt={item.name} style={{width:'1em', height:'1em', objectFit:'contain'}} /> 
                         : getEmojiByName(item.name, emoji)}
                     </span>
                     <div>
@@ -273,7 +273,7 @@ export default function PastaBuilder({ isEmbedded = false, onClose = null, embed
                         <div className="pb-summary-row-left">
                           <span className="pb-summary-emoji">
                             {isImageEmoji(getEmojiByName(t.name, '🧀')) 
-                              ? <img src={getEmojiByName(t.name, '🧀')} alt={t.name} style={{width:'100%', height:'100%', objectFit:'contain'}} /> 
+                              ? <img src={getEmojiByName(t.name, '🧀')} alt={t.name} style={{width:'1em', height:'1em', objectFit:'contain'}} /> 
                               : getEmojiByName(t.name, '🧀')}
                           </span>
                           <span className="pb-summary-name">{t.name}</span>
@@ -416,7 +416,7 @@ export default function PastaBuilder({ isEmbedded = false, onClose = null, embed
 
                   <div className="pb-option-emoji">
                     {isImageEmoji(getEmojiByName(product.name, step.emoji))
-                      ? <img src={getEmojiByName(product.name, step.emoji)} alt={product.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                      ? <img src={getEmojiByName(product.name, step.emoji)} alt={product.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
                       : getEmojiByName(product.name, step.emoji)}
                   </div>
                   <div className="pb-option-body">
