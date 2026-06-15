@@ -115,7 +115,7 @@ const emojiMap = {
   'coco': '🥥',
   
   // Ingredientes Pasta / Outros
-  'penne': '🫙',
+  'penne': 'https://res.cloudinary.com/da6o1jan3/image/upload/q_auto/f_png/v1781484444/penne_lpvjhc.png',
   'fettuccine': 'https://res.cloudinary.com/da6o1jan3/image/upload/q_auto/f_png/v1781484080/fettuccine_eilapq.png',
   'rigatoni': '🥫',
   'farfalle': '🦋',
