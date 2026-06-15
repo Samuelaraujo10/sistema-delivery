@@ -115,8 +115,8 @@ const emojiMap = {
   'coco': '🥥',
   
   // Ingredientes Pasta / Outros
-  'penne': 'https://res.cloudinary.com/da6o1jan3/image/upload/e_bgremoval,q_auto/f_png/v1781484444/penne_lpvjhc.png',
-  'fettuccine': 'https://res.cloudinary.com/da6o1jan3/image/upload/e_bgremoval,q_auto/f_png/v1781484080/fettuccine_eilapq.png',
+  'penne': 'https://res.cloudinary.com/da6o1jan3/image/upload/e_make_transparent:15:white,q_auto/f_png/v1781484444/penne_lpvjhc.png',
+  'fettuccine': 'https://res.cloudinary.com/da6o1jan3/image/upload/e_make_transparent:15:white,q_auto/f_png/v1781484080/fettuccine_eilapq.png',
   'rigatoni': '🥫',
   'farfalle': '🦋',
   'talharim': '🌾',
