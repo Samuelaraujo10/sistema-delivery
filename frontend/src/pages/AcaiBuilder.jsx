@@ -6,7 +6,7 @@ import {
 import { establishmentsAPI, productsAPI } from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import toast from 'react-hot-toast';
-import { getEmojiByName } from '../utils/emojiMap';
+import { getEmojiByName, isImageEmoji } from '../utils/emojiMap';
 import { useAuthStore } from '../store/authStore';
 import SuggestionsModal from '../components/SuggestionsModal';
 import './AcaiBuilder.css';
@@ -228,7 +228,11 @@ export default function AcaiBuilder({ isEmbedded = false, onClose = null, embedd
                   {selections[key].map(item => (
                     <div key={item.id} className="pb-summary-row pb-topping-row">
                       <div className="pb-summary-row-left">
-                        <span className="pb-summary-emoji">{getEmojiByName(item.name, '✨')}</span>
+                        <span className="pb-summary-emoji">
+                          {isImageEmoji(getEmojiByName(item.name, '✨'))
+                            ? <img src={getEmojiByName(item.name, '✨')} alt={item.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                            : getEmojiByName(item.name, '✨')}
+                        </span>
                         <span className="pb-summary-name">{item.name}</span>
                       </div>
                       <span className="pb-summary-price">Grátis</span>
@@ -305,7 +309,11 @@ export default function AcaiBuilder({ isEmbedded = false, onClose = null, embedd
                 <button key={product.id} className={`pb-option ${isSelected ? 'selected' : ''}`}
                   style={isSelected ? { borderColor: step.color, background: step.bg } : {}} onClick={() => handleSelect(step.key, product, step.single, step.max)}>
                   {product.featured && <div className="pb-option-star"><Star size={10} fill="#FFB800" color="#FFB800" /></div>}
-                  <div className="pb-option-emoji">{getEmojiByName(product.name, step.emoji)}</div>
+                  <div className="pb-option-emoji">
+                    {isImageEmoji(getEmojiByName(product.name, step.emoji))
+                      ? <img src={getEmojiByName(product.name, step.emoji)} alt={product.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                      : getEmojiByName(product.name, step.emoji)}
+                  </div>
                   <div className="pb-option-body"><span className="pb-option-name">{product.name}</span><span className="pb-option-desc">{product.description}</span></div>
                   <div className="pb-option-price">
                     {step.key === 'tamanho' 

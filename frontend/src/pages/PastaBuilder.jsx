@@ -7,7 +7,7 @@ import {
 import { establishmentsAPI, productsAPI } from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import toast from 'react-hot-toast';
-import { getEmojiByName } from '../utils/emojiMap';
+import { getEmojiByName, isImageEmoji } from '../utils/emojiMap';
 import { useAuthStore } from '../store/authStore';
 import SuggestionsModal from '../components/SuggestionsModal';
 import './PastaBuilder.css';
@@ -250,7 +250,11 @@ export default function PastaBuilder({ isEmbedded = false, onClose = null, embed
               ].map(({ label, emoji, item, color }) => item && (
                 <div key={label} className="pb-summary-row" style={{ borderColor: `${color}30` }}>
                   <div className="pb-summary-row-left">
-                    <span className="pb-summary-emoji">{getEmojiByName(item.name, emoji)}</span>
+                    <span className="pb-summary-emoji">
+                      {isImageEmoji(getEmojiByName(item.name, emoji)) 
+                        ? <img src={getEmojiByName(item.name, emoji)} alt={item.name} style={{width:'100%', height:'100%', objectFit:'contain'}} /> 
+                        : getEmojiByName(item.name, emoji)}
+                    </span>
                     <div>
                       <span className="pb-summary-cat" style={{ color }}>{label}</span>
                       <span className="pb-summary-name">{item.name}</span>
@@ -267,7 +271,11 @@ export default function PastaBuilder({ isEmbedded = false, onClose = null, embed
                     {topping.map((t, idx) => (
                       <div key={t.id} className="pb-summary-row pb-topping-row">
                         <div className="pb-summary-row-left">
-                          <span className="pb-summary-emoji">{getEmojiByName(t.name, '🧀')}</span>
+                          <span className="pb-summary-emoji">
+                            {isImageEmoji(getEmojiByName(t.name, '🧀')) 
+                              ? <img src={getEmojiByName(t.name, '🧀')} alt={t.name} style={{width:'100%', height:'100%', objectFit:'contain'}} /> 
+                              : getEmojiByName(t.name, '🧀')}
+                          </span>
                           <span className="pb-summary-name">{t.name}</span>
                         </div>
                         <span className="pb-summary-price">
@@ -406,7 +414,11 @@ export default function PastaBuilder({ isEmbedded = false, onClose = null, embed
                     </div>
                   )}
 
-                  <div className="pb-option-emoji">{emoji}</div>
+                  <div className="pb-option-emoji">
+                    {isImageEmoji(getEmojiByName(product.name, step.emoji))
+                      ? <img src={getEmojiByName(product.name, step.emoji)} alt={product.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                      : getEmojiByName(product.name, step.emoji)}
+                  </div>
                   <div className="pb-option-body">
                     <span className="pb-option-name">{product.name}</span>
                     <span className="pb-option-desc">{product.description}</span>

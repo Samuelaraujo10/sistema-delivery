@@ -6,7 +6,7 @@ import {
 import { establishmentsAPI, productsAPI } from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import toast from 'react-hot-toast';
-import { getEmojiByName } from '../utils/emojiMap';
+import { getEmojiByName, isImageEmoji } from '../utils/emojiMap';
 import { useAuthStore } from '../store/authStore';
 import SuggestionsModal from '../components/SuggestionsModal';
 import './PizzaBuilder.css';
@@ -192,7 +192,11 @@ export default function PizzaBuilder({ isEmbedded = false, onClose = null, embed
             <div className="pb-summary-items">
               <div className="pb-summary-row" style={{ borderColor: '#EF444430' }}>
                 <div className="pb-summary-row-left">
-                  <span className="pb-summary-emoji">{getEmojiByName(tamanho.name, '📏')}</span>
+                  <span className="pb-summary-emoji">
+                    {isImageEmoji(getEmojiByName(tamanho.name, '📏'))
+                      ? <img src={getEmojiByName(tamanho.name, '📏')} alt={tamanho.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                      : getEmojiByName(tamanho.name, '📏')}
+                  </span>
                   <div><span className="pb-summary-cat" style={{color: '#EF4444'}}>Tamanho</span><span className="pb-summary-name">{tamanho.name}</span></div>
                 </div>
                 <span className="pb-summary-price">R$ {parseFloat(tamanho.price).toFixed(2)}</span>
@@ -204,7 +208,11 @@ export default function PizzaBuilder({ isEmbedded = false, onClose = null, embed
                   {sabor.map(s => (
                     <div key={s.id} className="pb-summary-row pb-topping-row">
                       <div className="pb-summary-row-left">
-                        <span className="pb-summary-emoji">{getEmojiByName(s.name, '🍕')}</span>
+                        <span className="pb-summary-emoji">
+                          {isImageEmoji(getEmojiByName(s.name, '🍕'))
+                            ? <img src={getEmojiByName(s.name, '🍕')} alt={s.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                            : getEmojiByName(s.name, '🍕')}
+                        </span>
                         <span className="pb-summary-name">{s.name}</span>
                       </div>
                       <span className="pb-summary-price">{parseFloat(s.price) === 0 ? 'Incluso' : `Maior valor (R$ ${parseFloat(s.price).toFixed(2)})`}</span>
@@ -221,7 +229,11 @@ export default function PizzaBuilder({ isEmbedded = false, onClose = null, embed
               {borda && (
                 <div className="pb-summary-row" style={{ borderColor: '#10B98130' }}>
                   <div className="pb-summary-row-left">
-                    <span className="pb-summary-emoji">{getEmojiByName(borda.name, '🥯')}</span>
+                    <span className="pb-summary-emoji">
+                      {isImageEmoji(getEmojiByName(borda.name, '🥯'))
+                        ? <img src={getEmojiByName(borda.name, '🥯')} alt={borda.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                        : getEmojiByName(borda.name, '🥯')}
+                    </span>
                     <div><span className="pb-summary-cat" style={{color: '#10B981'}}>Borda</span><span className="pb-summary-name">{borda.name}</span></div>
                   </div>
                   <span className="pb-summary-price">{parseFloat(borda.price) === 0 ? 'Incluso' : `R$ ${parseFloat(borda.price).toFixed(2)}`}</span>
@@ -295,7 +307,11 @@ export default function PizzaBuilder({ isEmbedded = false, onClose = null, embed
                 <button key={product.id} className={`pb-option ${isSelected ? 'selected' : ''}`}
                   style={isSelected ? { borderColor: step.color, background: step.bg } : {}} onClick={() => handleSelect(step.key, product, step.single, step.max)}>
                   {product.featured && <div className="pb-option-star"><Star size={10} fill="#FFB800" color="#FFB800" /></div>}
-                  <div className="pb-option-emoji">{getEmojiByName(product.name, step.emoji)}</div>
+                  <div className="pb-option-emoji">
+                    {isImageEmoji(getEmojiByName(product.name, step.emoji))
+                      ? <img src={getEmojiByName(product.name, step.emoji)} alt={product.name} style={{width:'100%', height:'100%', objectFit:'contain'}} />
+                      : getEmojiByName(product.name, step.emoji)}
+                  </div>
                   <div className="pb-option-body"><span className="pb-option-name">{product.name}</span><span className="pb-option-desc">{product.description}</span></div>
                   <div className="pb-option-price">{parseFloat(product.price) === 0 ? <span className="pb-free">Grátis</span> : `R$ ${parseFloat(product.price).toFixed(2)}`}</div>
                 </button>
