@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { ShoppingCart, ArrowRight, Check, X, Sparkles } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { getEmojiByName, isImageEmoji } from '../utils/emojiMap';
+import { optimizeImage } from '../utils/imageOptimizer';
 import toast from 'react-hot-toast';
 import './SuggestionsModal.css';
 
@@ -74,11 +75,11 @@ export default function SuggestionsModal({ isOpen, onClose, establishment, onGoT
                 <div className="suggestion-item-left">
                   {item.image ? (
                     <div className="suggestion-image-wrap">
-                      <img src={item.image} alt={item.name} className="suggestion-product-img" />
+                      <img src={optimizeImage(item.image, 200)} alt={item.name} className="suggestion-product-img" loading="lazy" />
                     </div>
                   ) : isImgEmoji ? (
                     <div className="suggestion-emoji suggestion-emoji-sticker">
-                      <img src={emoji} className="suggestion-emoji-sticker-img" alt={item.name} />
+                      <img src={emoji} className="suggestion-emoji-sticker-img" alt={item.name} loading="lazy" />
                     </div>
                   ) : (
                     <div className="suggestion-emoji">{emoji}</div>

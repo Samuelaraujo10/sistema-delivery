@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import './MenuManagement.css';
 import { Plus, Trash2, Edit3, LayoutGrid, Settings2 } from 'lucide-react';
+import { optimizeImage } from '../utils/imageOptimizer';
 
 const typeEmoji = {
   acai: 'AC',
@@ -233,7 +234,7 @@ export default function MenuManagement({
                   <div className="item-main-info">
                     <div className="item-img-placeholder">
                       {product.image ? (
-                        <img src={product.image} alt={product.name} />
+                        <img src={optimizeImage(product.image, 200)} alt={product.name} loading="lazy" />
                       ) : isImageEmoji(getEmojiByName(product.name, typeEmoji[establishment.type])) ? (
                         <img 
                           src={getEmojiByName(product.name, typeEmoji[establishment.type])} 

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Star, Clock, Bike, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getReadableColor } from '../utils/colorUtils';
+import { optimizeImage } from '../utils/imageOptimizer';
 import './EstablishmentCard.css';
 
 const TYPE_EMOJIS = {
@@ -48,8 +49,8 @@ export default function EstablishmentCard({ establishment }) {
       >
         {logo ? (
           <div className="est-card-branded">
-            <div className="est-card-blur" style={{ backgroundImage: `url(${logo})` }} />
-            <img src={logo} alt={name} className="est-card-main-img" />
+            <div className="est-card-blur" style={{ backgroundImage: `url(${optimizeImage(logo, 200)})` }} />
+            <img src={optimizeImage(logo, 300)} alt={name} className="est-card-main-img" loading="lazy" />
           </div>
         ) : (
           <>

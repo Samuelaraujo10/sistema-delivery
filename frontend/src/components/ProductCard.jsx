@@ -5,6 +5,7 @@ import { useCartStore } from '../store/cartStore';
 import ProductDetailModal from './ProductDetailModal';
 import toast from 'react-hot-toast';
 import { getEmojiByName, isImageEmoji } from '../utils/emojiMap';
+import { optimizeImage } from '../utils/imageOptimizer';
 import { useAuthStore } from '../store/authStore';
 import './ProductCard.css';
 
@@ -89,13 +90,14 @@ export default function ProductCard({ product, establishment, isAdminMode, onEdi
 
         <div className="product-card-image">
           {product.image ? (
-            <img src={product.image} alt={product.name} />
+            <img src={optimizeImage(product.image, 400)} alt={product.name} loading="lazy" />
           ) : isImageEmoji(getEmojiByName(product.name, typeEmoji[establishment.type])) ? (
             <div className="product-emoji product-emoji-sticker">
               <img 
                 src={getEmojiByName(product.name, typeEmoji[establishment.type])} 
                 className="product-emoji-sticker-img" 
                 alt={product.name} 
+                loading="lazy"
               />
             </div>
           ) : (

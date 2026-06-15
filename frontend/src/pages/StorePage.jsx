@@ -12,8 +12,9 @@ import { useAuthStore } from '../store/authStore';
 import './StorePage.css';
 
 const TYPE_EMOJIS = { acai: '🍇', pizza: '🍕', burger: '🍔', sushi: '🍱', pasta: '🍝', massa: '🍝', other: '🍽️' };
-
+import { useCartStore } from '../store/cartStore';
 import ProductFormModal from '../components/ProductFormModal';
+import { optimizeImage } from '../utils/imageOptimizer';
 import { getEmojiByName, isImageEmoji } from '../utils/emojiMap';
 import AcaiBuilder from './AcaiBuilder';
 import PizzaBuilder from './PizzaBuilder';
@@ -458,9 +459,9 @@ export default function StorePage() {
               <div className="store-cover-branded">
                 <div 
                   className="store-cover-blur" 
-                  style={{ backgroundImage: `url(${establishment.logo})` }} 
+                  style={{ backgroundImage: `url(${optimizeImage(establishment.logo, 200)})` }} 
                 />
-                <img src={establishment.logo} alt={name} className="store-cover-main-img" />
+                <img src={optimizeImage(establishment.logo, 400)} alt={name} className="store-cover-main-img" />
               </div>
             ) : (
               <div className="store-emoji">{TYPE_EMOJIS[type] || '🍽️'}</div>

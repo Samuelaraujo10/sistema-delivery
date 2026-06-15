@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { X, ShoppingBag } from 'lucide-react';
 import ProductModifierGroup from './ProductModifierGroup';
 import { useCartStore } from '../store/cartStore';
-import toast from 'react-hot-toast';
 import { getEmojiByName, isImageEmoji } from '../utils/emojiMap';
+import { optimizeImage } from '../utils/imageOptimizer';
+import toast from 'react-hot-toast';
 import './ProductDetailModal.css';
 
 const ProductDetailModal = ({ product, establishment, onClose }) => {
@@ -75,13 +76,14 @@ const ProductDetailModal = ({ product, establishment, onClose }) => {
 
         <div className="modal-header-image">
           {product.image ? (
-            <img src={product.image} alt={product.name} />
+            <img src={optimizeImage(product.image, 600)} alt={product.name} loading="lazy" />
           ) : isImageEmoji(getEmojiByName(product.name, '')) ? (
             <div className="modal-image-emoji-container">
               <img 
                 src={getEmojiByName(product.name, '')} 
                 alt={product.name} 
                 className="modal-image-emoji-img" 
+                loading="lazy"
               />
             </div>
           ) : (
