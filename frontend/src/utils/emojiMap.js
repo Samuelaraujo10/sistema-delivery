@@ -116,7 +116,7 @@ const emojiMap = {
   
   // Ingredientes Pasta / Outros
   'penne': '🫙',
-  'fettuccine': 'https://res.cloudinary.com/da6o1jan3/image/upload/q_auto/f_auto/v1781484080/fettuccine_eilapq.ico',
+  'fettuccine': 'https://res.cloudinary.com/da6o1jan3/image/upload/q_auto/f_png/v1781484080/fettuccine_eilapq.png',
   'rigatoni': '🥫',
   'farfalle': '🦋',
   'talharim': '🌾',
