@@ -3,7 +3,7 @@ const { Product, Category } = require('../models');
 const applyEmojiTransformation = (url) => {
   if (!url || typeof url !== 'string' || !url.includes('/upload/')) return url;
   if (url.includes('e_bgremoval') || url.includes('e_make_transparent')) return url;
-  return url.replace('/upload/', '/upload/e_bgremoval,e_make_transparent:15:white,c_fit,w_400,h_400,f_png/');
+  return url.replace('/upload/', '/upload/e_bgremoval,co_white,e_make_transparent:20,c_fit,w_400,h_400,f_png/');
 };
 
 const normalizeProductPayload = (payload) => {
