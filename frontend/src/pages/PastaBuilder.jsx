@@ -251,7 +251,9 @@ export default function PastaBuilder({ isEmbedded = false, onClose = null, embed
                 <div key={label} className="pb-summary-row" style={{ borderColor: `${color}30` }}>
                   <div className="pb-summary-row-left">
                     <span className="pb-summary-emoji">
-                      {isImageEmoji(getEmojiByName(item.name, emoji)) 
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
+                      ) : isImageEmoji(getEmojiByName(item.name, emoji)) 
                         ? <img src={getEmojiByName(item.name, emoji)} alt={item.name} style={{width:'1em', height:'1em', objectFit:'contain'}} /> 
                         : getEmojiByName(item.name, emoji)}
                     </span>
@@ -272,7 +274,9 @@ export default function PastaBuilder({ isEmbedded = false, onClose = null, embed
                       <div key={t.id} className="pb-summary-row pb-topping-row">
                         <div className="pb-summary-row-left">
                           <span className="pb-summary-emoji">
-                            {isImageEmoji(getEmojiByName(t.name, '🧀')) 
+                            {t.image ? (
+                              <img src={t.image} alt={t.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
+                            ) : isImageEmoji(getEmojiByName(t.name, '🧀')) 
                               ? <img src={getEmojiByName(t.name, '🧀')} alt={t.name} style={{width:'1em', height:'1em', objectFit:'contain'}} /> 
                               : getEmojiByName(t.name, '🧀')}
                           </span>
@@ -415,7 +419,9 @@ export default function PastaBuilder({ isEmbedded = false, onClose = null, embed
                   )}
 
                   <div className="pb-option-emoji">
-                    {isImageEmoji(getEmojiByName(product.name, step.emoji))
+                    {product.image ? (
+                       <img src={product.image} alt={product.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
+                    ) : isImageEmoji(getEmojiByName(product.name, step.emoji))
                       ? <img src={getEmojiByName(product.name, step.emoji)} alt={product.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
                       : getEmojiByName(product.name, step.emoji)}
                   </div>

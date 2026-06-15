@@ -229,7 +229,9 @@ export default function AcaiBuilder({ isEmbedded = false, onClose = null, embedd
                     <div key={item.id} className="pb-summary-row pb-topping-row">
                       <div className="pb-summary-row-left">
                         <span className="pb-summary-emoji">
-                          {isImageEmoji(getEmojiByName(item.name, '✨'))
+                          {item.image ? (
+                            <img src={item.image} alt={item.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
+                          ) : isImageEmoji(getEmojiByName(item.name, '✨'))
                             ? <img src={getEmojiByName(item.name, '✨')} alt={item.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
                             : getEmojiByName(item.name, '✨')}
                         </span>
@@ -310,7 +312,9 @@ export default function AcaiBuilder({ isEmbedded = false, onClose = null, embedd
                   style={isSelected ? { borderColor: step.color, background: step.bg } : {}} onClick={() => handleSelect(step.key, product, step.single, step.max)}>
                   {product.featured && <div className="pb-option-star"><Star size={10} fill="#FFB800" color="#FFB800" /></div>}
                   <div className="pb-option-emoji">
-                    {isImageEmoji(getEmojiByName(product.name, step.emoji))
+                    {product.image ? (
+                       <img src={product.image} alt={product.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
+                    ) : isImageEmoji(getEmojiByName(product.name, step.emoji))
                       ? <img src={getEmojiByName(product.name, step.emoji)} alt={product.name} style={{width:'1em', height:'1em', objectFit:'contain'}} />
                       : getEmojiByName(product.name, step.emoji)}
                   </div>

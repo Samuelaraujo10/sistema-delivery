@@ -20,6 +20,7 @@ const ProductFormModal = ({ product, categories, establishmentId, defaultBuilder
   });
 
   const [imageFile, setImageFile] = useState(null);
+  const [isEmojiIcon, setIsEmojiIcon] = useState(false);
   const [defaultCategoryId, setDefaultCategoryId] = useState('');
   useEffect(() => {
     if (formData.builderRole !== 'none') {
@@ -156,6 +157,7 @@ const ProductFormModal = ({ product, categories, establishmentId, defaultBuilder
         payload.append(key, key === 'modifierGroups' ? JSON.stringify(value || []) : value);
       });
       if (imageFile) payload.append('imageFile', imageFile);
+      if (isEmojiIcon) payload.append('isEmojiIcon', 'true');
 
       if (product) {
         await productsAPI.update(product.id, payload);
@@ -283,7 +285,7 @@ const ProductFormModal = ({ product, categories, establishmentId, defaultBuilder
             )}
           </div>
 
-          <div className="form-group">
+          <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label>Imagem do Produto</label>
             <input 
               type="file" 
@@ -293,6 +295,15 @@ const ProductFormModal = ({ product, categories, establishmentId, defaultBuilder
             {formData.image && !imageFile && (
               <small style={{ color: '#94A3B8' }}>Imagem atual: {formData.image.split('/').pop()}</small>
             )}
+            
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', marginTop: '8px', background: 'rgba(108, 99, 255, 0.1)', padding: '8px', borderRadius: '8px' }}>
+              <input 
+                type="checkbox" 
+                checked={isEmojiIcon} 
+                onChange={e => setIsEmojiIcon(e.target.checked)}
+              />
+              Recortar como Ícone (IA removerá o fundo automaticamente)
+            </label>
           </div>
 
 
