@@ -146,3 +146,18 @@
 .total-price {
   font-weight: 700;
 }
+
+@media (max-width: 480px) {
+  .product-detail-modal {
+    max-height: 100dvh !important;
+    height: 100dvh;
+    max-width: 100% !important;
+    border-radius: 0;
+    border: none;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .product-detail-modal::-webkit-scrollbar {
+    display: none;
+  }
+}

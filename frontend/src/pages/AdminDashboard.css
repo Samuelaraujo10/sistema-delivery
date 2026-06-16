@@ -445,6 +445,25 @@
   .form-row {
     grid-template-columns: 1fr;
   }
+
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal-content {
+    max-height: 100dvh;
+    height: 100dvh;
+    max-width: 100%;
+    border-radius: 0;
+    border: none;
+    padding: 24px 16px;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .modal-content::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
 }
 
 

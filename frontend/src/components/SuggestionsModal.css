@@ -224,8 +224,22 @@
 }
 
 @media (max-width: 480px) {
+  .suggestions-overlay {
+    padding: 0;
+  }
   .suggestions-card {
     padding: 24px 20px;
+    height: 100dvh;
+    max-height: 100dvh;
+    max-width: 100%;
+    border-radius: 0;
+    border: none;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .suggestions-card::-webkit-scrollbar {
+    display: none;
   }
   .suggestions-footer {
     flex-direction: column-reverse;
