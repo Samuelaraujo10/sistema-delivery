@@ -228,6 +228,7 @@
   color: #16A34A;
   border-radius: var(--radius-full);
   border: 1px solid rgba(22,163,74,0.25);
+  white-space: nowrap;
 }
 
 /* ─── Options Grid ────────────────────────────────────── */
@@ -563,5 +564,61 @@
 
   .pb-summary-total {
     padding: 16px 20px;
+  }
+
+  .pb-step-header {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 16px;
+    row-gap: 10px;
+    align-items: center;
+  }
+
+  .pb-step-emoji-lg {
+    font-size: 2rem;
+    grid-column: 1;
+    grid-row: 1 / -1;
+    align-self: center;
+  }
+
+  .pb-step-header > div {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .pb-step-title {
+    font-size: 1.15rem;
+  }
+
+  .pb-step-sub {
+    font-size: 0.8rem;
+  }
+
+  .pb-multi-badge {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0;
+    justify-self: flex-start;
+    font-size: 0.65rem;
+    padding: 4px 10px;
+  }
+
+  .pb-nav {
+    position: fixed;
+    bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom));
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    z-index: 90;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.4);
+  }
+
+  .pb-nav-btn {
+    flex: 1;
   }
 }

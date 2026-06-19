@@ -336,15 +336,22 @@
 }
 
 @media (max-width: 768px) {
+  .store-page {
+    padding-top: 0; /* Let the cover start from the very top */
+  }
   .store-cover {
-    height: 200px;
+    height: 180px;
   }
   .store-emoji {
     font-size: 5rem;
   }
   .products-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 1px; /* Divider-like gap */
+    background: var(--border); /* Divider color */
+    margin: 0 -16px; /* Pull to edges */
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
   }
   
   .store-info {

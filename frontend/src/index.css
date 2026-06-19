@@ -42,6 +42,9 @@
 
   --transition: 0.2s ease;
   --transition-slow: 0.4s ease;
+
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --bottom-nav-height: 65px;
 }
 
 html {
@@ -105,6 +108,11 @@ img {
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-subtle); }
+
+@media (max-width: 768px) {
+  ::-webkit-scrollbar { display: none; }
+  * { -ms-overflow-style: none; scrollbar-width: none; }
+}
 
 /* ==========================================
    LAYOUT
@@ -324,6 +332,9 @@ h4 { font-size: 1.1rem; font-weight: 600; }
    ========================================== */
 @media (max-width: 768px) {
   .container { padding: 0 16px; }
-  .page { padding-top: 80px; }
+  .page { 
+    padding-top: 60px; /* Reduzido para dar espaco */
+    padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + 20px); 
+  }
   .btn-lg { padding: 14px 24px; font-size: 0.95rem; }
 }

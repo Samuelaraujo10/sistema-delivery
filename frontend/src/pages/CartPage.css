@@ -418,6 +418,17 @@
   
   .checkout-card {
     padding: 16px;
+    padding-bottom: 80px; /* Space for the floating button */
+  }
+
+  .checkout-btn {
+    position: fixed;
+    bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + 16px);
+    left: 16px;
+    right: 16px;
+    width: calc(100% - 32px);
+    z-index: 90;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
   }
 }
   

@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
+import BottomNav from './components/BottomNav';
 
 import Home from './pages/Home';
 
@@ -81,6 +82,7 @@ export default function App() {
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </Suspense>
+      <BottomNav />
     </BrowserRouter>
   );
 }
