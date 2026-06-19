@@ -568,23 +568,17 @@
 
   .pb-step-header {
     padding: 16px;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    column-gap: 16px;
-    row-gap: 10px;
-    align-items: center;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    gap: 12px;
   }
 
   .pb-step-emoji-lg {
     font-size: 2rem;
-    grid-column: 1;
-    grid-row: 1 / -1;
-    align-self: center;
   }
 
   .pb-step-header > div {
-    grid-column: 2;
-    grid-row: 1;
+    flex: 1;
     min-width: 0;
   }
 
@@ -597,10 +591,6 @@
   }
 
   .pb-multi-badge {
-    grid-column: 2;
-    grid-row: 2;
-    margin: 0;
-    justify-self: flex-start;
     font-size: 0.65rem;
     padding: 4px 10px;
   }

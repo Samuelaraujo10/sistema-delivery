@@ -382,11 +382,11 @@ export default function PastaBuilder({ isEmbedded = false, onClose = null, embed
             <span className="pb-step-emoji-lg">{step.emoji}</span>
             <div>
               <h2 className="pb-step-title" style={{ color: step.color }}>{step.label}</h2>
-              <p className="pb-step-sub">{step.subtitle}</p>
+              <p className="pb-step-sub" style={{ marginBottom: !step.single ? '8px' : '0' }}>{step.subtitle}</p>
+              {!step.single && (
+                <span className="pb-multi-badge" style={{ margin: 0, display: 'inline-block' }}>Múltipla seleção</span>
+              )}
             </div>
-            {!step.single && (
-              <span className="pb-multi-badge">Múltipla seleção</span>
-            )}
           </div>
 
           <div className="pb-options-grid">

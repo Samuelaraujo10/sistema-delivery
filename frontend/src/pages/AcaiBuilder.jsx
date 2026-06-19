@@ -297,12 +297,15 @@ export default function AcaiBuilder({ isEmbedded = false, onClose = null, embedd
         <div className="pb-content fade-in" key={currentStep}>
           <div className="pb-step-header" style={{ borderColor: step.border, background: step.bg }}>
             <span className="pb-step-emoji-lg">{step.emoji}</span>
-            <div><h2 className="pb-step-title" style={{ color: step.color }}>{step.label}</h2><p className="pb-step-sub">{step.subtitle}</p></div>
-            {!step.single && (
-              <span className="pb-multi-badge acai-badge">
-                {step.max ? `Escolha até ${step.max} ${step.max === 1 ? 'opção' : 'opções'}` : 'Múltipla seleção'}
-              </span>
-            )}
+            <div>
+              <h2 className="pb-step-title" style={{ color: step.color }}>{step.label}</h2>
+              <p className="pb-step-sub" style={{ marginBottom: !step.single ? '8px' : '0' }}>{step.subtitle}</p>
+              {!step.single && (
+                <span className="pb-multi-badge acai-badge" style={{ margin: 0, display: 'inline-block' }}>
+                  {step.max > 1 ? `Até ${step.max} opções` : 'Múltipla seleção'}
+                </span>
+              )}
+            </div>
           </div>
           <div className="pb-options-grid">
             {stepItems.map(product => {

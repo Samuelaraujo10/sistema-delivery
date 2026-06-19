@@ -95,7 +95,7 @@ export default function Navbar() {
 
         <div className="navbar-actions">
           {user?.role !== 'admin' && (
-            <Link to="/cart" className="cart-btn desktop-only">
+            <Link to="/cart" className="cart-btn">
               <ShoppingCart size={20} />
               {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
             </Link>
@@ -153,11 +153,9 @@ export default function Navbar() {
             </Link>
           )}
 
-          {user?.role === 'admin' && (
-            <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
-              {menuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
-          )}
+          <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
       </div>
     </nav>

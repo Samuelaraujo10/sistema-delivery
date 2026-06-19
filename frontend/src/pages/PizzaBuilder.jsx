@@ -303,8 +303,11 @@ export default function PizzaBuilder({ isEmbedded = false, onClose = null, embed
         <div className="pb-content fade-in" key={currentStep}>
           <div className="pb-step-header" style={{ borderColor: step.border, background: step.bg }}>
             <span className="pb-step-emoji-lg">{step.emoji}</span>
-            <div><h2 className="pb-step-title" style={{ color: step.color }}>{step.label}</h2><p className="pb-step-sub">{step.subtitle}</p></div>
-            {!step.single && <span className="pb-multi-badge pizza-badge" style={{background: step.color + '20', color: step.color}}>Até {step.max} opções</span>}
+            <div>
+              <h2 className="pb-step-title" style={{ color: step.color }}>{step.label}</h2>
+              <p className="pb-step-sub" style={{ marginBottom: !step.single ? '8px' : '0' }}>{step.subtitle}</p>
+              {!step.single && <span className="pb-multi-badge pizza-badge" style={{background: step.color + '20', color: step.color, margin: 0, display: 'inline-block'}}>Até {step.max} opções</span>}
+            </div>
           </div>
           <div className="pb-options-grid">
             {stepItems.map(product => {
