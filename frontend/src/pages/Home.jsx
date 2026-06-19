@@ -37,23 +37,41 @@ export default function Home() {
   }, [user, navigate]);
 
   useEffect(() => {
+    let isCancelled = false;
+
     const fetchEstablishments = async () => {
-      setLoading(true);
+      // Mostra skeleton apenas na primeira carga ou se a lista estiver vazia
+      if (establishments.length === 0) setLoading(true);
+      
       try {
         const params = {};
         if (filter !== 'all') params.type = filter;
         if (search) params.search = search;
+        
         const { data } = await establishmentsAPI.list(params);
-        setEstablishments(data.data || []);
+        if (!isCancelled) {
+          setEstablishments(data.data || []);
+        }
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    const timer = setTimeout(fetchEstablishments, search ? 400 : 0);
-    return () => clearTimeout(timer);
+    let timer;
+    if (search) {
+      timer = setTimeout(fetchEstablishments, 400);
+    } else {
+      fetchEstablishments();
+    }
+
+    return () => {
+      isCancelled = true;
+      if (timer) clearTimeout(timer);
+    };
   }, [search, filter]);
 
   return (

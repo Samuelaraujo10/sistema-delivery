@@ -3,8 +3,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 
+import Home from './pages/Home';
+
 // Lazy loading pages
-const Home = React.lazy(() => import('./pages/Home'));
 const StorePage = React.lazy(() => import('./pages/StorePage'));
 const CartPage = React.lazy(() => import('./pages/CartPage'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage'));
