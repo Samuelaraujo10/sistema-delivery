@@ -7,6 +7,7 @@ const productRoutes = require('./products');
 const categoryRoutes = require('./categories');
 const orderRoutes = require('./orders');
 const reviewRoutes = require('./reviews');
+const tabRoutes = require('./tabs');
 
 const { optionalAuth } = require('../middlewares/auth');
 
@@ -16,5 +17,6 @@ router.use('/products', optionalAuth, productRoutes);
 router.use('/categories', optionalAuth, categoryRoutes);
 router.use('/orders', orderRoutes);
 router.use('/reviews', reviewRoutes);
+router.use('/tabs', tabRoutes);
 
 module.exports = router;

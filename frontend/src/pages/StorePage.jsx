@@ -32,6 +32,7 @@ export default function StorePage() {
   const [adminTab, setAdminTab] = useState('store'); // 'store', 'menu', 'orders', 'settings'
   const [storeTab, setStoreTab] = useState('menu'); // 'menu' | 'reviews'
   const [activeBuilder, setActiveBuilder] = useState(null); // 'acai' | 'pizza' | 'massa' | null
+  const [pdvStation, setPdvStation] = useState('all'); // 'all' | 'kitchen' | 'bar'
   const [orders, setOrders] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [imageFile, setImageFile] = useState(null);
@@ -664,152 +665,217 @@ export default function StorePage() {
 
           {adminTab === 'orders' && (
             <div className="admin-orders-view">
-              <div className="admin-view-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="admin-view-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                 <div>
                   <h2>Painel de Pedidos (PDV)</h2>
                   <p>Acompanhamento simplificado para a operação em tempo real</p>
                 </div>
-                <button 
-                  className="btn btn-primary" 
-                  onClick={fetchOrders}
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                >
-                  <Clock size={16} /> Atualizar
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ display: 'flex', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px', padding: '4px' }}>
+                    <button 
+                      onClick={() => setPdvStation('all')}
+                      style={{ padding: '6px 12px', background: pdvStation === 'all' ? 'var(--primary)' : 'transparent', color: pdvStation === 'all' ? '#fff' : 'var(--text-muted)', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem' }}
+                    >Geral</button>
+                    <button 
+                      onClick={() => setPdvStation('kitchen')}
+                      style={{ padding: '6px 12px', background: pdvStation === 'kitchen' ? 'var(--primary)' : 'transparent', color: pdvStation === 'kitchen' ? '#fff' : 'var(--text-muted)', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem' }}
+                    >Cozinha</button>
+                    <button 
+                      onClick={() => setPdvStation('bar')}
+                      style={{ padding: '6px 12px', background: pdvStation === 'bar' ? 'var(--primary)' : 'transparent', color: pdvStation === 'bar' ? '#fff' : 'var(--text-muted)', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem' }}
+                    >Copa/Bar</button>
+                  </div>
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={fetchOrders}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                  >
+                    <Clock size={16} /> Atualizar
+                  </button>
+                </div>
               </div>
 
               <div className="pdv-layout">
                 {/* Novos / Pendentes */}
                 <div className="pdv-column">
                   <h3><Package size={18} color="#6C63FF" /> Novos Pedidos</h3>
-                  {orders.filter(o => o.status === 'pending').map(order => (
-                    <div key={order.id} className="pdv-order-card pdv-alert-new">
-                      <div className="pdv-order-header">
-                        <span className="pdv-order-id">#{order.orderNumber || order.id.slice(-4)}</span>
-                        <span className="pdv-order-time">{new Date(order.createdAt).toLocaleTimeString()}</span>
-                      </div>
-                      
-                      <div className="pdv-order-meta">
-                        <p><strong>Cliente:</strong> {order.user?.name || 'Visitante'}</p>
-                        <p><strong>Pagamento:</strong> {order.paymentMethod === 'cash' ? 'Dinheiro' : order.paymentMethod === 'pix' ? 'Pix' : 'Cartão'}</p>
-                        <p><strong>Total:</strong> R$ {parseFloat(order.total).toFixed(2)}</p>
-                      </div>
+                  {(() => {
+                    const getFilteredItems = (order) => {
+                      if (pdvStation === 'all') return order.items || [];
+                      return (order.items || []).filter(item => {
+                        const station = item.product?.category?.station || 'kitchen';
+                        return station === pdvStation;
+                      });
+                    };
 
-                      <div className="pdv-order-items">
-                        {order.items?.map((item, idx) => (
-                          <div key={idx} className="pdv-order-item-row">
-                            <span className="pdv-order-item-qty">{item.quantity}x</span>
-                            <span>{item.name || item.product?.name}</span>
+                    const pendingOrders = orders.filter(o => o.status === 'pending' && getFilteredItems(o).length > 0);
+
+                    return (
+                      <>
+                        {pendingOrders.map(order => (
+                          <div key={order.id} className="pdv-order-card pdv-alert-new">
+                            <div className="pdv-order-header">
+                              <span className="pdv-order-id">
+                                #{order.orderNumber || order.id.slice(-4)}
+                                {order.tabId && <span style={{ marginLeft: '8px', background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem' }}>🎫 Comanda</span>}
+                              </span>
+                              <span className="pdv-order-time">{new Date(order.createdAt).toLocaleTimeString()}</span>
+                            </div>
+                            
+                            <div className="pdv-order-meta">
+                              <p><strong>Cliente:</strong> {order.user?.name || 'Visitante'}</p>
+                              {order.tabId ? (
+                                <p><strong>Status:</strong> Vinculado à Comanda</p>
+                              ) : (
+                                <>
+                                  <p><strong>Pagamento:</strong> {order.paymentMethod === 'cash' ? 'Dinheiro' : order.paymentMethod === 'pix' ? 'Pix' : 'Cartão'}</p>
+                                  <p><strong>Total:</strong> R$ {parseFloat(order.total).toFixed(2)}</p>
+                                </>
+                              )}
+                            </div>
+
+                            <div className="pdv-order-items">
+                              {getFilteredItems(order).map((item, idx) => (
+                                <div key={idx} className="pdv-order-item-row">
+                                  <span className="pdv-order-item-qty">{item.quantity}x</span>
+                                  <span>{item.name || item.product?.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                            
+                            {order.notes && (
+                              <div style={{ background: '#FFEB3B20', color: '#FFEB3B', padding: '8px', borderRadius: '4px', marginBottom: '12px', fontSize: '0.85rem' }}>
+                                <strong>Obs:</strong> {order.notes}
+                              </div>
+                            )}
+
+                            <div className="pdv-order-actions">
+                              <button className="pdv-btn pdv-btn-primary" onClick={() => updateOrderStatus(order.id, 'confirmed')}>
+                                Aceitar
+                              </button>
+                              <button className="pdv-btn" style={{ background: '#EF4444', color: 'white' }} onClick={() => {
+                                if (window.confirm('Deseja realmente recusar este pedido?')) {
+                                  updateOrderStatus(order.id, 'cancelled');
+                                }
+                              }}>
+                                Recusar
+                              </button>
+                              {order.paymentMethod === 'pix' && (
+                                <button className="pdv-btn" style={{ background: '#25D366', color: 'white' }} onClick={() => handleRequestPixReceipt(order)} title="Cobrar Pix via WhatsApp">
+                                  <MessageCircle size={18} />
+                                </button>
+                              )}
+                              <button className="pdv-print-btn" onClick={() => window.print()} title="Imprimir Comanda">
+                                <ClipboardList size={18} />
+                              </button>
+                            </div>
                           </div>
                         ))}
-                      </div>
-                      
-                      {order.notes && (
-                        <div style={{ background: '#FFEB3B20', color: '#FFEB3B', padding: '8px', borderRadius: '4px', marginBottom: '12px', fontSize: '0.85rem' }}>
-                          <strong>Obs:</strong> {order.notes}
-                        </div>
-                      )}
-
-                      <div className="pdv-order-actions">
-                        <button className="pdv-btn pdv-btn-primary" onClick={() => updateOrderStatus(order.id, 'confirmed')}>
-                          Aceitar
-                        </button>
-                        <button className="pdv-btn" style={{ background: '#EF4444', color: 'white' }} onClick={() => {
-                          if (window.confirm('Deseja realmente recusar este pedido?')) {
-                            updateOrderStatus(order.id, 'cancelled');
-                          }
-                        }}>
-                          Recusar
-                        </button>
-                        {order.paymentMethod === 'pix' && (
-                          <button className="pdv-btn" style={{ background: '#25D366', color: 'white' }} onClick={() => handleRequestPixReceipt(order)} title="Cobrar Pix via WhatsApp">
-                            <MessageCircle size={18} />
-                          </button>
+                        {pendingOrders.length === 0 && (
+                          <p style={{ color: '#94A3B8', fontSize: '0.9rem', textAlign: 'center', marginTop: '20px' }}>Nenhum pedido novo</p>
                         )}
-                        <button className="pdv-print-btn" onClick={() => window.print()} title="Imprimir Comanda">
-                          <ClipboardList size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  {orders.filter(o => o.status === 'pending').length === 0 && (
-                    <p style={{ color: '#94A3B8', fontSize: '0.9rem', textAlign: 'center', marginTop: '20px' }}>Nenhum pedido novo</p>
-                  )}
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {/* Em Preparo */}
                 <div className="pdv-column">
                   <h3><ChefHat size={18} color="#FF8C00" /> Preparando</h3>
-                  {orders.filter(o => o.status === 'confirmed' || o.status === 'preparing').map(order => (
-                    <div key={order.id} className="pdv-order-card" style={{ borderLeftColor: '#FF8C00' }}>
-                      <div className="pdv-order-header">
-                        <span className="pdv-order-id">#{order.orderNumber || order.id.slice(-4)}</span>
-                        <span className="pdv-order-time">{new Date(order.createdAt).toLocaleTimeString()}</span>
-                      </div>
-                      
-                      <div className="pdv-order-meta">
-                        <p><strong>Cliente:</strong> {order.user?.name || 'Visitante'}</p>
-                        <p><strong>Endereço:</strong> {order.deliveryAddress}</p>
-                      </div>
-                      
-                      <div className="pdv-order-items" style={{opacity: 0.7}}>
-                        {order.items?.map((item, idx) => (
-                          <div key={idx} className="pdv-order-item-row">
-                            <span className="pdv-order-item-qty">{item.quantity}x</span>
-                            <span>{item.name || item.product?.name}</span>
+                  {(() => {
+                    const getFilteredItems = (order) => {
+                      if (pdvStation === 'all') return order.items || [];
+                      return (order.items || []).filter(item => {
+                        const station = item.product?.category?.station || 'kitchen';
+                        return station === pdvStation;
+                      });
+                    };
+
+                    const prepOrders = orders.filter(o => (o.status === 'confirmed' || o.status === 'preparing') && getFilteredItems(o).length > 0);
+
+                    return (
+                      <>
+                        {prepOrders.map(order => (
+                          <div key={order.id} className="pdv-order-card" style={{ borderLeftColor: '#FF8C00' }}>
+                            <div className="pdv-order-header">
+                              <span className="pdv-order-id">#{order.orderNumber || order.id.slice(-4)}</span>
+                              <span className="pdv-order-time">{new Date(order.createdAt).toLocaleTimeString()}</span>
+                            </div>
+                            
+                            <div className="pdv-order-meta">
+                              <p><strong>Cliente:</strong> {order.user?.name || 'Visitante'}</p>
+                              <p><strong>Endereço:</strong> {order.deliveryAddress}</p>
+                            </div>
+                            
+                            <div className="pdv-order-items" style={{opacity: 0.7}}>
+                              {getFilteredItems(order).map((item, idx) => (
+                                <div key={idx} className="pdv-order-item-row">
+                                  <span className="pdv-order-item-qty">{item.quantity}x</span>
+                                  <span>{item.name || item.product?.name}</span>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="pdv-order-actions">
+                              {order.status === 'confirmed' ? (
+                                <button className="pdv-btn pdv-btn-warning" onClick={() => updateOrderStatus(order.id, 'preparing')}>
+                                  Iniciar Preparo
+                                </button>
+                              ) : (
+                                <button className="pdv-btn pdv-btn-primary" style={{ background: '#00D9A6' }} onClick={() => updateOrderStatus(order.id, 'delivering')}>
+                                  Saiu p/ Entrega
+                                </button>
+                              )}
+                              {order.paymentMethod === 'pix' && (
+                                <button className="pdv-print-btn" style={{ color: '#25D366', borderColor: '#25D366' }} onClick={() => handleRequestPixReceipt(order)} title="Cobrar Pix via WhatsApp">
+                                  <MessageCircle size={18} />
+                                </button>
+                              )}
+                            </div>
                           </div>
                         ))}
-                      </div>
-
-                      <div className="pdv-order-actions">
-                        {order.status === 'confirmed' ? (
-                          <button className="pdv-btn pdv-btn-warning" onClick={() => updateOrderStatus(order.id, 'preparing')}>
-                            Iniciar Preparo
-                          </button>
-                        ) : (
-                          <button className="pdv-btn pdv-btn-primary" style={{ background: '#00D9A6' }} onClick={() => updateOrderStatus(order.id, 'delivering')}>
-                            Saiu p/ Entrega
-                          </button>
+                        {prepOrders.length === 0 && (
+                          <p style={{ color: '#94A3B8', fontSize: '0.9rem', textAlign: 'center', marginTop: '20px' }}>Nenhum pedido na cozinha</p>
                         )}
-                        {order.paymentMethod === 'pix' && (
-                          <button className="pdv-print-btn" style={{ color: '#25D366', borderColor: '#25D366' }} onClick={() => handleRequestPixReceipt(order)} title="Cobrar Pix via WhatsApp">
-                            <MessageCircle size={18} />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                  {orders.filter(o => o.status === 'confirmed' || o.status === 'preparing').length === 0 && (
-                    <p style={{ color: '#94A3B8', fontSize: '0.9rem', textAlign: 'center', marginTop: '20px' }}>Nenhum pedido na cozinha</p>
-                  )}
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {/* Saiu para Entrega */}
                 <div className="pdv-column">
                   <h3><Bike size={18} color="#00D9A6" /> Em Entrega</h3>
-                  {orders.filter(o => o.status === 'delivering').map(order => (
-                    <div key={order.id} className="pdv-order-card" style={{ borderLeftColor: '#00D9A6' }}>
-                      <div className="pdv-order-header">
-                        <span className="pdv-order-id">#{order.orderNumber || order.id.slice(-4)}</span>
-                        <span className="pdv-order-time">{new Date(order.createdAt).toLocaleTimeString()}</span>
-                      </div>
-                      
-                      <div className="pdv-order-meta">
-                        <p><strong>Endereço:</strong> {order.deliveryAddress}</p>
-                        <p><strong>Pagamento:</strong> {order.paymentMethod === 'cash' ? 'Dinheiro' : order.paymentMethod === 'pix' ? 'Pix' : 'Cartão'}</p>
-                        <p><strong>Cobrar:</strong> R$ {parseFloat(order.total).toFixed(2)}</p>
-                      </div>
+                  {(() => {
+                    const deliveringOrders = orders.filter(o => o.status === 'delivering');
 
-                      <div className="pdv-order-actions">
-                        <button className="pdv-btn pdv-btn-success" onClick={() => updateOrderStatus(order.id, 'delivered')}>
-                          Finalizar (Entregue)
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  {orders.filter(o => o.status === 'delivering').length === 0 && (
-                    <p style={{ color: '#94A3B8', fontSize: '0.9rem', textAlign: 'center', marginTop: '20px' }}>Nenhuma entrega em rota</p>
-                  )}
+                    return (
+                      <>
+                        {deliveringOrders.map(order => (
+                          <div key={order.id} className="pdv-order-card" style={{ borderLeftColor: '#00D9A6' }}>
+                            <div className="pdv-order-header">
+                              <span className="pdv-order-id">#{order.orderNumber || order.id.slice(-4)}</span>
+                              <span className="pdv-order-time">{new Date(order.createdAt).toLocaleTimeString()}</span>
+                            </div>
+                            
+                            <div className="pdv-order-meta">
+                              <p><strong>Endereço:</strong> {order.deliveryAddress}</p>
+                              <p><strong>Pagamento:</strong> {order.paymentMethod === 'cash' ? 'Dinheiro' : order.paymentMethod === 'pix' ? 'Pix' : 'Cartão'}</p>
+                              <p><strong>Cobrar:</strong> R$ {parseFloat(order.total).toFixed(2)}</p>
+                            </div>
+
+                            <div className="pdv-order-actions">
+                              <button className="pdv-btn pdv-btn-success" onClick={() => updateOrderStatus(order.id, 'delivered')}>
+                                Finalizar (Entregue)
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                        {deliveringOrders.length === 0 && (
+                          <p style={{ color: '#94A3B8', fontSize: '0.9rem', textAlign: 'center', marginTop: '20px' }}>Nenhuma entrega em rota</p>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

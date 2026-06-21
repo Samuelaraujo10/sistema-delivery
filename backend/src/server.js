@@ -5,12 +5,15 @@ const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const { sequelize } = require('./database');
 const routes = require('./routes');
 const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 3002;
 
 // Middlewares
@@ -29,6 +32,36 @@ app.use(cors({
   },
   credentials: true,
 }));
+
+// Configuração do Socket.io
+const io = new Server(server, {
+  cors: {
+    origin: '*', // Ajuste conforme necessário em produção
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log(`🔌 Novo cliente conectado: ${socket.id}`);
+  
+  // Exemplo de join room por estabelecimento
+  socket.on('join_establishment', (establishmentId) => {
+    socket.join(`establishment_${establishmentId}`);
+    console.log(`Cliente ${socket.id} entrou na sala do estabelecimento: ${establishmentId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`🔌 Cliente desconectado: ${socket.id}`);
+  });
+});
+
+// Middleware para injetar o io nas rotas
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -49,7 +82,7 @@ sequelize.sync({ alter: true }).then(async () => {
   console.log('✅ Banco de dados sincronizado');
   const { seedDatabase } = require('./database/seeders');
   await seedDatabase();
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📡 API disponível em http://localhost:${PORT}/api`);
   });

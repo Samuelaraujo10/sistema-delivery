@@ -66,7 +66,11 @@ class OrderController {
           {
             model: OrderItem,
             as: 'items',
-            include: [{ model: Product, as: 'product' }],
+            include: [{ 
+              model: Product, 
+              as: 'product',
+              include: ['category']
+            }],
           },
           { model: Establishment, as: 'establishment' },
           { model: User, as: 'user', attributes: ['id', 'name', 'email', 'phone'] }
@@ -87,7 +91,11 @@ class OrderController {
           {
             model: OrderItem,
             as: 'items',
-            include: [{ model: Product, as: 'product' }],
+            include: [{ 
+              model: Product, 
+              as: 'product',
+              include: ['category']
+            }],
           },
           { model: Establishment, as: 'establishment' },
           { model: User, as: 'user', attributes: ['id', 'name', 'email', 'phone'] }
@@ -112,14 +120,14 @@ class OrderController {
 
   async create(req, res) {
     try {
-      const { establishmentId, items, paymentMethod, deliveryAddress, userAddress, notes } = req.body;
+      const { establishmentId, items, paymentMethod, deliveryAddress, userAddress, notes, type, tableNumber, tabId } = req.body;
 
       if (!req.user) {
         return res.status(401).json({ success: false, message: 'Faca login para finalizar o pedido' });
       }
 
-      if (req.user.role === 'admin') {
-        return res.status(403).json({ success: false, message: 'Lojistas e administradores não podem realizar pedidos.' });
+      if (req.user.role === 'admin' && type !== 'dine_in') {
+        return res.status(403).json({ success: false, message: 'Administradores não podem realizar pedidos delivery.' });
       }
 
       if (!Array.isArray(items) || items.length === 0) {
@@ -295,6 +303,9 @@ class OrderController {
           paymentMethod,
           deliveryAddress,
           notes,
+          type: type || 'delivery',
+          tableNumber: tableNumber || null,
+          tabId: tabId || null,
           userId: req.user.id,
           subtotal,
           deliveryFee,
@@ -323,6 +334,12 @@ class OrderController {
       });
 
       notifyClients(fullOrder);
+      
+      // Emitir via WebSockets
+      if (req.io) {
+        req.io.to(`establishment_${establishmentId}`).emit('new_order', fullOrder);
+        req.io.emit('new_order_global', fullOrder); // Opção para todos
+      }
 
       return res.status(201).json({ success: true, data: fullOrder });
     } catch (error) {
@@ -355,6 +372,12 @@ class OrderController {
 
       // Notificar clientes via SSE
       notifyClients(fullOrder);
+
+      // Emitir via WebSockets
+      if (req.io) {
+        req.io.to(`establishment_${fullOrder.establishmentId}`).emit('order_status_updated', fullOrder);
+        req.io.emit('order_status_updated_global', fullOrder);
+      }
 
       // Enviar mensagem WhatsApp via Twilio ao cliente
       try {

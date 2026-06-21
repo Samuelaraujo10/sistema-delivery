@@ -5,6 +5,7 @@ const User = require('./User');
 const Order = require('./Order');
 const OrderItem = require('./OrderItem');
 const Review = require('./Review');
+const Tab = require('./Tab');
 
 // Associations
 Establishment.hasMany(Category, { foreignKey: 'establishment_id', as: 'categories' });
@@ -28,6 +29,12 @@ User.belongsTo(Establishment, { foreignKey: 'establishment_id', as: 'establishme
 Order.hasMany(OrderItem, { foreignKey: 'order_id', as: 'items' });
 OrderItem.belongsTo(Order, { foreignKey: 'order_id' });
 
+Tab.hasMany(Order, { foreignKey: 'tab_id', as: 'orders' });
+Order.belongsTo(Tab, { foreignKey: 'tab_id', as: 'tab' });
+
+Establishment.hasMany(Tab, { foreignKey: 'establishment_id', as: 'tabs' });
+Tab.belongsTo(Establishment, { foreignKey: 'establishment_id', as: 'establishment' });
+
 Product.hasMany(OrderItem, { foreignKey: 'product_id' });
 OrderItem.belongsTo(Product, { foreignKey: 'product_id', as: 'product' });
 
@@ -44,4 +51,4 @@ Review.belongsTo(Product, { foreignKey: 'product_id', as: 'product' });
 Order.hasMany(Review, { foreignKey: 'order_id', as: 'reviews' });
 Review.belongsTo(Order, { foreignKey: 'order_id', as: 'order' });
 
-module.exports = { Establishment, Category, Product, User, Order, OrderItem, Review };
+module.exports = { Establishment, Category, Product, User, Order, OrderItem, Review, Tab };

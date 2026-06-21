@@ -33,6 +33,11 @@ const Product = sequelize.define('Product', {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  isQuickAdd: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    field: 'is_quick_add',
+  },
   preparationTime: {
     type: DataTypes.INTEGER,
     defaultValue: 15,

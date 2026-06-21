@@ -25,6 +25,10 @@ const Category = sequelize.define('Category', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+  station: {
+    type: DataTypes.ENUM('kitchen', 'bar'),
+    defaultValue: 'kitchen',
+  },
   establishmentId: {
     type: DataTypes.UUID,
     allowNull: false,

@@ -12,6 +12,15 @@ const Order = sequelize.define('Order', {
     unique: true,
     field: 'order_number',
   },
+  type: {
+    type: DataTypes.ENUM('delivery', 'dine_in', 'takeaway'),
+    defaultValue: 'delivery',
+  },
+  tableNumber: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'table_number',
+  },
   status: {
     type: DataTypes.ENUM('pending', 'confirmed', 'preparing', 'delivering', 'delivered', 'cancelled'),
     defaultValue: 'pending',
@@ -49,6 +58,11 @@ const Order = sequelize.define('Order', {
     type: DataTypes.UUID,
     allowNull: false,
     field: 'establishment_id',
+  },
+  tabId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'tab_id',
   },
 }, {
   tableName: 'orders',

@@ -6,19 +6,20 @@ import BottomNav from './components/BottomNav';
 
 import Home from './pages/Home';
 
-// Lazy loading pages
-const StorePage = React.lazy(() => import('./pages/StorePage'));
-const CartPage = React.lazy(() => import('./pages/CartPage'));
-const LoginPage = React.lazy(() => import('./pages/LoginPage'));
-const RegisterPage = React.lazy(() => import('./pages/RegisterPage'));
-const VerifyEmailPage = React.lazy(() => import('./pages/VerifyEmailPage'));
-const OrderTrackingPage = React.lazy(() => import('./pages/OrderTrackingPage'));
-const PastaBuilder = React.lazy(() => import('./pages/PastaBuilder'));
-const AcaiBuilder = React.lazy(() => import('./pages/AcaiBuilder'));
-const PizzaBuilder = React.lazy(() => import('./pages/PizzaBuilder'));
-const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
-const OrdersPage = React.lazy(() => import('./pages/OrdersPage'));
-const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
+import StorePage from './pages/StorePage';
+import CartPage from './pages/CartPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import OrderTrackingPage from './pages/OrderTrackingPage';
+import PastaBuilder from './pages/PastaBuilder';
+import AcaiBuilder from './pages/AcaiBuilder';
+import PizzaBuilder from './pages/PizzaBuilder';
+import AdminDashboard from './pages/AdminDashboard';
+import OrdersPage from './pages/OrdersPage';
+import ProfilePage from './pages/ProfilePage';
+import WaiterDashboard from './pages/WaiterDashboard';
+import TableOrderPage from './pages/TableOrderPage';
 import { useAuthStore } from './store/authStore';
 import { authAPI } from './services/api';
 
@@ -69,6 +70,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/store/:slug" element={<StorePage />} />
+          <Route path="/store/:slug/table/:tableNumber" element={<TableOrderPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -76,6 +78,7 @@ export default function App() {
           <Route path="/order/:id" element={<OrderTrackingPage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/waiter" element={<WaiterDashboard />} />
           <Route path="/builder/pasta/:slug" element={<PastaBuilder />} />
           <Route path="/builder/acai/:slug" element={<AcaiBuilder />} />
           <Route path="/builder/pizza/:slug" element={<PizzaBuilder />} />

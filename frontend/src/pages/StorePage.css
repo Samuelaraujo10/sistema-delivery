@@ -1277,11 +1277,122 @@
   width: 100%;
 }
 
-.admin-form-flat .form-group input:not([type="checkbox"]):not([type="radio"]):focus, 
-.admin-form-flat .form-group select:focus, 
 .admin-form-flat .form-group textarea:focus {
   border-color: var(--primary);
   background: rgba(255, 255, 255, 0.05);
   outline: none;
   box-shadow: 0 0 10px rgba(108, 99, 255, 0.15);
+}
+
+/* TableOrderPage Mobile Cart Drawer */
+.mobile-cart-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  z-index: 1000;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mcd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.mcd-header h4 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary);
+}
+
+.mcd-items {
+  max-height: 150px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
+.mcd-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.mcd-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg);
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+
+.mcd-controls button {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+}
+
+.btn-mcd-send {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.btn-mcd-send:disabled {
+  opacity: 0.6;
+}
+
+.call-waiter-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(var(--primary-rgb), 0.1);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px dashed var(--primary);
+}
+
+.call-waiter-banner span {
+  font-weight: bold;
+  color: var(--text);
+}
+
+.btn-call-waiter {
+  background: var(--bg-alt);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+  cursor: pointer;
 }

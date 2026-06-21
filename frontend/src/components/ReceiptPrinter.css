@@ -1,0 +1,101 @@
+/* ReceiptPrinter.css */
+
+.receipt-printer-container {
+  display: none; /* Hide by default on screen */
+}
+
+@media print {
+  /* Esconde todos os outros elementos do corpo do site */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Exibe apenas o container do recibo e seus filhos */
+  .receipt-printer-container, .receipt-printer-container * {
+    visibility: visible;
+  }
+  
+  /* Posiciona o recibo no topo esquerdo do papel */
+  .receipt-printer-container {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm; /* Largura padrão de bobina térmica */
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', Courier, monospace; /* Fonte monoespaçada para alinhamento */
+    font-size: 12px;
+    color: #000;
+    background: #fff;
+  }
+
+  .receipt-content {
+    width: 100%;
+    padding: 2mm;
+    box-sizing: border-box;
+  }
+
+  h2, h3, p {
+    margin: 4px 0;
+    text-align: center;
+  }
+
+  h2 {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  h3 {
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 8px 0;
+  }
+
+  .receipt-customer p {
+    text-align: left;
+    margin: 2px 0;
+  }
+
+  .receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .receipt-table th, .receipt-table td {
+    padding: 2px 0;
+    font-size: 12px;
+  }
+
+  .item-notes {
+    font-size: 10px;
+    font-style: italic;
+  }
+
+  .receipt-totals {
+    margin-top: 8px;
+  }
+
+  .tot-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 2px 0;
+  }
+
+  .grand-total {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 4px 0;
+  }
+
+  .receipt-footer {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 10px;
+  }
+}

@@ -88,6 +88,12 @@ export const ordersAPI = {
   notifyPix: (id) => api.post(`/orders/${id}/notify-pix`),
 };
 
+export const tabsAPI = {
+  open: (data) => api.post('/tabs', data),
+  listOpen: (establishmentId) => api.get(`/tabs/establishment/${establishmentId}`),
+  close: (id, data) => api.post(`/tabs/${id}/close`, data),
+};
+
 export const reviewsAPI = {
   create: (data) => api.post('/reviews', data),
   getByEstablishment: (id) => api.get(`/reviews/establishment/${id}`),
