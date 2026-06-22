@@ -79,7 +79,7 @@ app.use(errorHandler);
 
 // Inicializar banco e servidor
 const isDev = process.env.NODE_ENV !== 'production';
-sequelize.sync({ alter: isDev }).then(async () => {
+sequelize.sync().then(async () => {
   console.log('✅ Banco de dados sincronizado');
   
   try {
