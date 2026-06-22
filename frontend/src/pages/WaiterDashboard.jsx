@@ -364,8 +364,9 @@ export default function WaiterDashboard() {
               <Send size={18} /> {isSubmitting ? 'Enviando...' : 'Enviar Pedido'}
             </button>
           </div>
-          </>
-        )}
+        </div>
+        </>
+      )}
 
         {activeTab === 'open' && (
           <div className="open-tabs-view" style={{ width: '100%', padding: '0 20px' }}>
