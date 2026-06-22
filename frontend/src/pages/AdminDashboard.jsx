@@ -198,6 +198,7 @@ const AdminDashboard = () => {
     { value: 'mexican', label: 'Mexicano', emoji: '🌮' },
     { value: 'chinese', label: 'Chinês', emoji: '🥡' },
     { value: 'bakery', label: 'Padaria', emoji: '🍞' },
+    { value: 'bar', label: 'Bar', emoji: '🍻' },
     { value: 'other', label: 'Outros', emoji: '🍽️' },
   ];
 
@@ -211,6 +212,7 @@ const AdminDashboard = () => {
     mexican: '🌮',
     chinese: '🥡',
     bakery: '🍞',
+    bar: '🍻',
     other: '🍽️'
   };
 
@@ -223,6 +225,7 @@ const AdminDashboard = () => {
     mexican: 'Mexicano',
     chinese: 'Chinês',
     bakery: 'Padaria',
+    bar: 'Bar',
     other: 'Outros'
   };
 
@@ -541,6 +544,7 @@ const AdminDashboard = () => {
                     <option value="mexican">🌮 Mexicano</option>
                     <option value="chinese">🥡 Chinês</option>
                     <option value="bakery">🍞 Padaria</option>
+                    <option value="bar">🍻 Bar</option>
                     <option value="other">🍽️ Outros</option>
                   </select>
                 </div>

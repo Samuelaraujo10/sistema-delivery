@@ -17,7 +17,7 @@ const Establishment = sequelize.define('Establishment', {
     unique: true,
   },
   type: {
-    type: DataTypes.ENUM('acai', 'pizza', 'burger', 'sushi', 'mexican', 'chinese', 'bakery', 'pasta', 'other'),
+    type: DataTypes.ENUM('acai', 'pizza', 'burger', 'sushi', 'mexican', 'chinese', 'bakery', 'pasta', 'bar', 'other'),
     allowNull: false,
     defaultValue: 'other',
   },
