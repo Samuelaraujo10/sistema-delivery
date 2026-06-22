@@ -509,7 +509,7 @@ const AdminDashboard = () => {
       {/* Establishment Modal */}
       {isEstModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: '840px' }}>
+          <div className="modal-content" style={{ maxWidth: '960px' }}>
             <div className="modal-header">
               <h2>{editingEstablishment ? 'Editar Loja' : 'Cadastrar Nova Loja'}</h2>
               <button className="close-modal" onClick={() => setIsEstModalOpen(false)}>
