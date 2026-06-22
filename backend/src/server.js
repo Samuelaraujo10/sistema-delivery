@@ -78,8 +78,17 @@ app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() 
 app.use(errorHandler);
 
 // Inicializar banco e servidor
-sequelize.sync({ alter: true }).then(async () => {
+sequelize.sync().then(async () => {
   console.log('✅ Banco de dados sincronizado');
+  
+  try {
+    // Forçar a adição do enum 'bar' no Postgres já que desativamos o alter: true
+    await sequelize.query(`ALTER TYPE "enum_establishments_type" ADD VALUE IF NOT EXISTS 'bar'`);
+    console.log('✅ Enum bar garantido no banco');
+  } catch (err) {
+    console.log('⚠️ Aviso ao adicionar enum (pode já existir):', err.message);
+  }
+
   const { seedDatabase } = require('./database/seeders');
   await seedDatabase();
   server.listen(PORT, () => {
