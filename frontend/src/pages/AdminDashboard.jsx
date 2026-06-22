@@ -592,7 +592,7 @@ const AdminDashboard = () => {
               </div>
 
               <div className="form-section-title">Logística & Finanças</div>
-              <div className="form-grid-3">
+              <div className="form-grid">
                 <div className="form-group">
                   <label>Taxa de Entrega (R$)</label>
                   <input 
@@ -611,6 +611,9 @@ const AdminDashboard = () => {
                     onChange={e => setEstFormData({ ...estFormData, minOrder: parseFloat(e.target.value) || 0 })} 
                   />
                 </div>
+              </div>
+
+              <div className="form-grid">
                 <div className="form-group">
                   <label>Tempo Estimado (min)</label>
                   <input 
@@ -619,9 +622,6 @@ const AdminDashboard = () => {
                     onChange={e => setEstFormData({ ...estFormData, deliveryTime: parseInt(e.target.value) || 40 })} 
                   />
                 </div>
-              </div>
-
-              <div className="form-grid">
                 <div className="form-group">
                   <label>WhatsApp para Notificações</label>
                   <input 
@@ -631,15 +631,16 @@ const AdminDashboard = () => {
                     placeholder="Ex: 5511999999999"
                   />
                 </div>
-                <div className="form-group">
-                  <label>Chave Pix para Recebimento</label>
-                  <input 
-                    type="text" 
-                    value={estFormData.pixKey} 
-                    onChange={e => setEstFormData({ ...estFormData, pixKey: e.target.value })} 
-                    placeholder="CNPJ, E-mail, Celular ou Chave Aleatória"
-                  />
-                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '24px' }}>
+                <label>Chave Pix para Recebimento</label>
+                <input 
+                  type="text" 
+                  value={estFormData.pixKey} 
+                  onChange={e => setEstFormData({ ...estFormData, pixKey: e.target.value })} 
+                  placeholder="CNPJ, E-mail, Celular ou Chave Aleatória"
+                />
               </div>
 
               <div className="form-section-title">Design & Identidade Visual</div>
