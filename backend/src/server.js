@@ -78,7 +78,8 @@ app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() 
 app.use(errorHandler);
 
 // Inicializar banco e servidor
-sequelize.sync().then(async () => {
+const isDev = process.env.NODE_ENV !== 'production';
+sequelize.sync({ alter: isDev }).then(async () => {
   console.log('✅ Banco de dados sincronizado');
   
   try {
