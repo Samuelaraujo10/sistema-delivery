@@ -40,6 +40,7 @@ const AdminDashboard = () => {
   const [isEstModalOpen, setIsEstModalOpen] = useState(false);
   const [estLogoFile, setEstLogoFile] = useState(null);
   const [editingEstablishment, setEditingEstablishment] = useState(null);
+  const [storeToDelete, setStoreToDelete] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [estFormData, setEstFormData] = useState({
     name: '',
@@ -168,14 +169,20 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteEst = async (id) => {
-    if (!window.confirm('Deseja desativar esta loja permanentemente?')) return;
+  const handleDeleteEst = (est) => {
+    setStoreToDelete(est);
+  };
+
+  const confirmDelete = async () => {
+    if (!storeToDelete) return;
     try {
-      await establishmentsAPI.delete(id);
-      toast.success('Loja desativada');
+      await establishmentsAPI.delete(storeToDelete.id);
+      toast.success('Loja desativada com sucesso!');
       fetchEstablishments();
     } catch (error) {
       toast.error('Erro ao excluir loja');
+    } finally {
+      setStoreToDelete(null);
     }
   };
 
@@ -474,7 +481,7 @@ const AdminDashboard = () => {
                   </button>
                   <button 
                     className="admin-est-btn admin-est-btn-delete" 
-                    onClick={() => handleDeleteEst(est.id)} 
+                    onClick={() => handleDeleteEst(est)} 
                     title="Excluir Estabelecimento"
                   >
                     <Trash2 size={14} />
@@ -742,6 +749,37 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
+      {/* Confirm Delete Modal */}
+      {storeToDelete && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
+            <div style={{ marginBottom: '20px', color: '#FF6584' }}>
+              <Trash2 size={48} />
+            </div>
+            <h3 style={{ marginBottom: '12px' }}>Desativar Loja?</h3>
+            <p style={{ color: '#94A3B8', marginBottom: '24px', lineHeight: '1.5' }}>
+              Tem certeza que deseja desativar a loja <strong>{storeToDelete.name}</strong>? Ela não estará mais visível para os clientes.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button 
+                onClick={() => setStoreToDelete(null)} 
+                className="btn-secondary" 
+                style={{ flex: 1 }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmDelete} 
+                className="btn-submit" 
+                style={{ flex: 1, background: '#FF6584' }}
+              >
+                Desativar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
