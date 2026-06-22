@@ -98,7 +98,7 @@ const AdminDashboard = () => {
         logo: est.logo || '',
         deliveryFee: est.deliveryFee || 0,
         minOrder: est.minOrder || 0,
-        deliveryTime: est.deliveryTime || 40,
+        deliveryTime: est.deliveryTime ?? 40,
         address: est.address || '',
         phone: est.phone || '',
         email: '',
@@ -446,7 +446,7 @@ const AdminDashboard = () => {
                   </span>
                   <span className="admin-est-meta-item">
                     <Clock size={12} />
-                    <span>{est.deliveryTime || 40} min</span>
+                    <span>{est.deliveryTime ?? 40} min</span>
                   </span>
                   <span className="admin-est-meta-item">
                     <DollarSign size={12} />
@@ -618,8 +618,12 @@ const AdminDashboard = () => {
                   <label>Tempo Estimado (min)</label>
                   <input 
                     type="number" 
+                    min="0"
                     value={estFormData.deliveryTime} 
-                    onChange={e => setEstFormData({ ...estFormData, deliveryTime: parseInt(e.target.value) || 40 })} 
+                    onChange={e => {
+                      const val = parseInt(e.target.value, 10);
+                      setEstFormData({ ...estFormData, deliveryTime: isNaN(val) ? 0 : val });
+                    }} 
                   />
                 </div>
                 <div className="form-group">
