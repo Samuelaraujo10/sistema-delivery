@@ -21,6 +21,11 @@ const Establishment = sequelize.define('Establishment', {
     allowNull: false,
     defaultValue: 'other',
   },
+  plan: {
+    type: DataTypes.ENUM('delivery', 'pro'),
+    allowNull: false,
+    defaultValue: 'delivery',
+  },
   description: {
     type: DataTypes.TEXT,
   },

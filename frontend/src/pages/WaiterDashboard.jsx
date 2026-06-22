@@ -216,6 +216,26 @@ export default function WaiterDashboard() {
     return <div className="waiter-loading">Carregando painel do garçom...</div>;
   }
 
+  if (establishment?.plan !== 'pro') {
+    return (
+      <div className="waiter-dashboard" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', textAlign: 'center', padding: '20px' }}>
+        <div style={{ background: 'var(--bg-card)', padding: '40px', borderRadius: '12px', border: '1px solid var(--border)', maxWidth: '500px' }}>
+          <UtensilsCrossed size={48} color="var(--primary)" style={{ marginBottom: '20px' }} />
+          <h2>Funcionalidade Exclusiva</h2>
+          <p style={{ color: 'var(--text-muted)', margin: '15px 0' }}>
+            O Painel do Garçom e a gestão de comandas estão disponíveis apenas no <strong>Plano Pro / Salão & PDV</strong>.
+          </p>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '25px' }}>
+            Faça o upgrade do seu estabelecimento para destravar essa ferramenta e agilizar o atendimento nas mesas!
+          </p>
+          <button className="btn btn-primary" onClick={() => navigate(`/store/${establishment.slug}`)}>
+            Voltar ao Painel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="waiter-dashboard">
       <div className="waiter-header">

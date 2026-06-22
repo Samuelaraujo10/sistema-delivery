@@ -20,6 +20,13 @@ export default function TableOrderPage() {
     const fetchStore = async () => {
       try {
         const { data } = await establishmentsAPI.getBySlug(slug);
+        
+        if (data.data.plan !== 'pro') {
+          toast.error('Este estabelecimento não possui o módulo de Mesas ativo.');
+          navigate(`/store/${slug}`);
+          return;
+        }
+
         setEstablishment(data.data);
         
         // Load categories, but ignore builders since we just want quick orders

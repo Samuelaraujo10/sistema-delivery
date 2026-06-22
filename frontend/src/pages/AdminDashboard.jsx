@@ -58,6 +58,7 @@ const AdminDashboard = () => {
     whatsapp: '',
     pixKey: '',
     hasBuilder: true,
+    plan: 'delivery',
   });
 
   useEffect(() => {
@@ -107,6 +108,7 @@ const AdminDashboard = () => {
         whatsapp: est.whatsapp || '',
         pixKey: est.pixKey || '',
         hasBuilder: est.hasBuilder ?? true,
+        plan: est.plan || 'delivery',
       });
     } else {
       setEditingEstablishment(null);
@@ -127,6 +129,7 @@ const AdminDashboard = () => {
         whatsapp: '',
         pixKey: '',
         hasBuilder: true,
+        plan: 'delivery',
       });
     }
     setIsEstModalOpen(true);
@@ -539,6 +542,16 @@ const AdminDashboard = () => {
                     <option value="chinese">🥡 Chinês</option>
                     <option value="bakery">🍞 Padaria</option>
                     <option value="other">🍽️ Outros</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Plano de Assinatura</label>
+                  <select 
+                    value={estFormData.plan} 
+                    onChange={e => setEstFormData({ ...estFormData, plan: e.target.value })}
+                  >
+                    <option value="delivery">Basic / Delivery</option>
+                    <option value="pro">Pro / Salão & PDV</option>
                   </select>
                 </div>
               </div>
