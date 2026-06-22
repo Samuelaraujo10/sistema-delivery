@@ -4,6 +4,7 @@ import { ordersAPI } from '../services/api';
 import { Star, Clock, Calendar, ShoppingBag, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ReviewFormModal from '../components/ReviewFormModal';
+import socket from '../services/socket';
 import './OrdersPage.css';
 
 const formatDate = (dateStr) => {
@@ -55,6 +56,28 @@ export default function OrdersPage() {
       }
     };
     fetchOrders();
+
+    socket.connect();
+    
+    // O backend envia order_status_updated_global com os dados completos do pedido
+    // Nós só verificamos se o pedido atualizado já está na nossa lista (para não atualizar atoa)
+    // Se estiver, fazemos um fetchOrders para pegar tudo atualizado
+    const handleStatusUpdated = (updatedOrder) => {
+      setOrders(currentOrders => {
+        const hasOrder = currentOrders.some(o => o.id === updatedOrder.id);
+        if (hasOrder) {
+          // Pequeno delay ou chama direto
+          fetchOrders();
+        }
+        return currentOrders;
+      });
+    };
+
+    socket.on('order_status_updated_global', handleStatusUpdated);
+
+    return () => {
+      socket.off('order_status_updated_global', handleStatusUpdated);
+    };
   }, []);
 
   if (loading) {

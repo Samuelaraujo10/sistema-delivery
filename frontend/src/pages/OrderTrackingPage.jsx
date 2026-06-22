@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { CheckCircle, Clock, ChefHat, Bike, Package, XCircle, MessageCircle, Smartphone } from 'lucide-react';
 import { ordersAPI } from '../services/api';
 import { QRCodeSVG } from 'qrcode.react';
+import socket from '../services/socket';
 import './OrderTrackingPage.css';
 import { generatePixPayload } from '../utils/pix';
 
@@ -53,43 +54,34 @@ export default function OrderTrackingPage() {
 
     fetchOrder();
 
-    // Conectando ao fluxo Server-Sent Events (SSE)
-    const auth = JSON.parse(sessionStorage.getItem('delivery-auth') || '{}');
-    const token = auth?.state?.token;
-    const eventSource = new EventSource(`/api/orders/events?token=${token}`);
+    // Conectando via Socket.io
+    socket.connect();
 
-    eventSource.onmessage = (event) => {
-      try {
-        const updatedOrder = JSON.parse(event.data);
-        if (updatedOrder.id === id) {
-          setOrder(updatedOrder);
+    const handleStatusUpdated = (updatedOrder) => {
+      if (updatedOrder.id === id) {
+        setOrder(updatedOrder);
 
-          const statusMap = {
-            confirmed: 'Confirmado e aceito! 🍳',
-            preparing: 'Em preparo na cozinha! 👨‍🍳',
-            delivering: 'Saiu para entrega! 🛵',
-            delivered: 'Entregue! Bom apetite! 🎉',
-            cancelled: 'Pedido cancelado ou recusado. ❌'
-          };
-          toast(statusMap[updatedOrder.status] || `Status atualizado: ${updatedOrder.status}`, {
-            icon: '🔔',
-            duration: 4000
-          });
-        }
-      } catch (err) {
-        console.error('Falha ao processar evento SSE:', err);
+        const statusMap = {
+          confirmed: 'Confirmado e aceito! 🍳',
+          preparing: 'Em preparo na cozinha! 👨‍🍳',
+          delivering: 'Saiu para entrega! 🛵',
+          delivered: 'Entregue! Bom apetite! 🎉',
+          cancelled: 'Pedido cancelado ou recusado. ❌'
+        };
+        toast(statusMap[updatedOrder.status] || `Status atualizado: ${updatedOrder.status}`, {
+          icon: '🔔',
+          duration: 4000
+        });
       }
     };
 
-    eventSource.onerror = (err) => {
-      eventSource.close();
-    };
+    socket.on('order_status_updated_global', handleStatusUpdated);
 
-    // Mantemos um polling de segurança com intervalo maior caso ocorra alguma queda no SSE
+    // Mantemos um polling de segurança com intervalo maior
     const interval = setInterval(fetchOrder, 20000);
 
     return () => {
-      eventSource.close();
+      socket.off('order_status_updated_global', handleStatusUpdated);
       clearInterval(interval);
     };
   }, [id]);

@@ -30,6 +30,8 @@ export default function LoginPage() {
         } else {
           navigate('/admin');
         }
+      } else if (loggedUser.role === 'waiter') {
+        navigate('/waiter');
       } else {
         navigate('/');
       }
@@ -54,6 +56,8 @@ export default function LoginPage() {
         } else {
           navigate('/admin');
         }
+      } else if (loggedUser.role === 'waiter') {
+        navigate('/waiter');
       } else {
         navigate('/');
       }

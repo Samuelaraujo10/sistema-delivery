@@ -10,6 +10,7 @@ import Skeleton from '../components/Skeleton';
 import ProductSkeleton from '../components/ProductSkeleton';
 import { useAuthStore } from '../store/authStore';
 import './StorePage.css';
+import socket from '../services/socket';
 
 const TYPE_EMOJIS = { acai: '🍇', pizza: '🍕', burger: '🍔', sushi: '🍱', pasta: '🍝', massa: '🍝', other: '🍽️' };
 import { useCartStore } from '../store/cartStore';
@@ -22,6 +23,8 @@ import PastaBuilder from './PastaBuilder';
 import { getReadableColor } from '../utils/colorUtils';
 import MenuManagement from './MenuManagement';
 import ReviewsList from '../components/ReviewsList';
+import TeamManagement from './TeamManagement';
+import { Users } from 'lucide-react';
 
 export default function StorePage() {
   const { slug } = useParams();
@@ -29,7 +32,7 @@ export default function StorePage() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(null);
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [adminTab, setAdminTab] = useState('store'); // 'store', 'menu', 'orders', 'settings'
+  const [adminTab, setAdminTab] = useState('store'); // 'store', 'menu', 'orders', 'settings', 'team'
   const [storeTab, setStoreTab] = useState('menu'); // 'menu' | 'reviews'
   const [activeBuilder, setActiveBuilder] = useState(null); // 'acai' | 'pizza' | 'massa' | null
   const [pdvStation, setPdvStation] = useState('all'); // 'all' | 'kitchen' | 'bar'
@@ -137,6 +140,13 @@ export default function StorePage() {
     if (!refresh) setLoading(true);
     try {
       const { data } = await establishmentsAPI.getBySlug(slug, user?.role === 'admin' ? { adminView: true } : {});
+      
+      // Se for garçom, ele não usa o StorePage público nem admin, ele usa apenas o dashboard de garçom
+      if (user?.role === 'waiter') {
+        navigate('/waiter');
+        return;
+      }
+
       setEstablishment(data.data);
       
       // Initialize config form
@@ -296,35 +306,31 @@ export default function StorePage() {
     if (adminTab === 'orders' && establishment) {
       fetchOrders();
 
-      const auth = JSON.parse(sessionStorage.getItem('delivery-auth') || '{}');
-      const token = auth?.state?.token;
-      const eventSource = new EventSource(`/api/orders/events?token=${token}`);
+      socket.connect();
+      socket.emit('join_establishment', establishment.id);
 
-      eventSource.onmessage = (event) => {
-        try {
-          const updatedOrder = JSON.parse(event.data);
-          
-          if (updatedOrder.establishmentId === establishment.id) {
-            fetchOrders();
-            if (updatedOrder.status === 'pending') {
-              toast('Novo pedido recebido!', { icon: '🔔', duration: 5000 });
-            }
+      const handleNewOrder = (updatedOrder) => {
+        if (updatedOrder.establishmentId === establishment.id) {
+          fetchOrders();
+          if (updatedOrder.status === 'pending') {
+            toast('Novo pedido recebido!', { icon: '🔔', duration: 5000 });
           }
-        } catch (err) {
-          console.error('Falha ao processar evento SSE no PDV:', err);
         }
       };
 
-      eventSource.onerror = (err) => {
-        eventSource.close();
+      const handleStatusUpdated = (updatedOrder) => {
+        if (updatedOrder.establishmentId === establishment.id) {
+          fetchOrders();
+        }
       };
 
-      // Intervalo de segurança maior como fallback
-      const interval = setInterval(fetchOrders, 60000);
+      socket.on('new_order', handleNewOrder);
+      socket.on('order_status_updated', handleStatusUpdated);
 
       return () => {
-        eventSource.close();
-        clearInterval(interval);
+        socket.off('new_order', handleNewOrder);
+        socket.off('order_status_updated', handleStatusUpdated);
+        // Não desconectar aqui se formos usar em outras partes globais, mas para simplificar:
       };
     }
   }, [adminTab, establishment]);
@@ -449,6 +455,12 @@ export default function StorePage() {
                 onClick={() => setAdminTab('settings')}
               >
                 <Palette size={18} /> Ajustes
+              </button>
+              <button 
+                className={`admin-nav-btn ${adminTab === 'team' ? 'active' : ''}`}
+                onClick={() => setAdminTab('team')}
+              >
+                <Users size={18} /> Equipe
               </button>
             </div>
 
@@ -898,6 +910,11 @@ export default function StorePage() {
           )}
 
           {adminTab === 'settings' && (
+                // ...existing settings component...
+                // Using a trick: I don't want to replace the whole content of settings, I just want to add team.
+                // Wait, if I replace line 1083, I need to match exactly. Let me use a separate chunk.
+                // It's better to just add it after the settings.
+
             <div className="admin-settings-view">
               <div className="admin-view-header">
                 <h2>Configurações da Loja</h2>
@@ -1092,6 +1109,9 @@ export default function StorePage() {
               </div>
             </div>
           )}
+          {adminTab === 'team' && (
+            <TeamManagement establishmentId={establishment.id} />
+          )}
         </div>
       )}
 
@@ -1156,7 +1176,7 @@ export default function StorePage() {
                   required
                 />
               </div>
-              <button type="submit" className="btn-submit" disabled={isSaving || !categoryModal.name.trim()}>
+              <button type="submit" className="btn btn-primary" disabled={isSaving || !categoryModal.name.trim()} style={{ width: '100%' }}>
                 {isSaving ? 'Salvando...' : 'Salvar Categoria'}
               </button>
             </form>
@@ -1177,15 +1197,15 @@ export default function StorePage() {
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
               <button 
                 onClick={() => setCatToDelete(null)} 
-                className="btn-secondary" 
+                className="btn btn-secondary" 
                 style={{ flex: 1 }}
               >
                 Cancelar
               </button>
               <button 
                 onClick={confirmDeleteCategory} 
-                className="btn-submit" 
-                style={{ flex: 1, background: '#FF6584' }}
+                className="btn btn-danger" 
+                style={{ flex: 1, background: '#FF6584', color: '#fff', border: 'none' }}
               >
                 Excluir
               </button>

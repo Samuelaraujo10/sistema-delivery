@@ -18,6 +18,15 @@ const ReceiptPrinter = forwardRef(({ order, onPrintDone }, ref) => {
     <div className="receipt-printer-container" ref={ref}>
       <div className="receipt-content">
         <div className="receipt-header">
+          {order.establishment?.logoUrl && (
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+              <img 
+                src={order.establishment.logoUrl} 
+                alt="Logo" 
+                style={{ width: '80px', height: '80px', objectFit: 'contain', filter: 'grayscale(100%)' }} 
+              />
+            </div>
+          )}
           <h2>{order.establishment?.name || 'Sistema Delivery'}</h2>
           <p>CNPJ: {order.establishment?.cnpj || '00.000.000/0000-00'}</p>
           <p>{order.establishment?.address || ''}</p>

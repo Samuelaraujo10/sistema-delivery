@@ -18,5 +18,6 @@ router.use('/categories', optionalAuth, categoryRoutes);
 router.use('/orders', orderRoutes);
 router.use('/reviews', reviewRoutes);
 router.use('/tabs', tabRoutes);
+router.use('/team', require('./team'));
 
 module.exports = router;

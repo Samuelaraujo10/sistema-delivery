@@ -108,4 +108,11 @@ export const authAPI = {
   updateProfile: (data) => api.put('/auth/profile', data),
 };
 
+export const teamAPI = {
+  list: () => api.get('/team'),
+  create: (data) => api.post('/team', data),
+  update: (id, data) => api.put(`/team/${id}`, data),
+  delete: (id) => api.delete(`/team/${id}`),
+};
+
 export default api;

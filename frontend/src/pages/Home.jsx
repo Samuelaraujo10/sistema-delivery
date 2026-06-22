@@ -33,6 +33,8 @@ export default function Home() {
       } else {
         navigate('/admin');
       }
+    } else if (user && user.role === 'waiter') {
+      navigate('/waiter');
     }
   }, [user, navigate]);
 
