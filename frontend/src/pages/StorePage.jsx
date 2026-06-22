@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 const DEFAULT_MENU_CATEGORIES = ['Pratos Principais', 'Entradas', 'Sobremesas', 'Bebidas', 'Outros'];
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { ArrowLeft, Star, Clock, Bike, MapPin, Phone, ChevronDown, Settings, Plus, Edit3, Trash2, Eye, EyeOff, ClipboardList, Layout, Palette, Image, MessageCircle, ChefHat, Package } from 'lucide-react';
+import { ArrowLeft, Star, Clock, Bike, MapPin, Phone, ChevronDown, Settings, Plus, Edit3, Trash2, Eye, EyeOff, ClipboardList, Layout, Palette, Image, MessageCircle, ChefHat, Package, X } from 'lucide-react';
 import { establishmentsAPI, productsAPI, categoriesAPI, ordersAPI } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import Skeleton from '../components/Skeleton';
@@ -59,19 +59,13 @@ export default function StorePage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   
-  // Auth check
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const isOwner = user?.role === 'admin' && (user.establishmentId === establishment?.id || !user.establishmentId);
 
-  useEffect(() => {
-    if (user?.role === 'admin' && user?.establishmentId && establishment && establishment.id !== user.establishmentId) {
-      toast.error('Você só tem permissão para visualizar o seu próprio restaurante.');
-      navigate(`/store/${user.establishment?.slug || ''}`);
-    }
-  }, [user, establishment, navigate]);
-
   const [menuSubTab, setMenuSubTab] = useState('dishes'); // 'dishes' | 'ingredients'
+  const [categoryModal, setCategoryModal] = useState({ open: false, editingCat: null, name: '' });
+  const [catToDelete, setCatToDelete] = useState(null);
 
   // Categories exclusive to the builder flow (Monte o seu)
   const BUILDER_ONLY_CATEGORIES = ['Massas', 'Molhos', 'Proteínas', 'Toppings'];
@@ -205,48 +199,70 @@ export default function StorePage() {
 
   // Create a new category; if a name is supplied it will be used directly, otherwise a prompt is shown.
   const handleAddCategory = async (providedName) => {
-    let name = providedName;
-    if (!name) {
-      name = window.prompt('Nome da nova categoria (ex: Lanches, Bebidas):');
-    }
-    if (!name || name.trim() === '') return;
-    try {
-      await categoriesAPI.create({
-        name: name.trim(),
-        icon: '🏷️',
-        establishmentId: establishment.id,
-      });
-      toast.success('Categoria criada com sucesso!');
-      fetchStoreData(true);
-    } catch (err) {
-      toast.error('Erro ao criar categoria');
-      console.error(err);
+    if (typeof providedName === 'string' && providedName.trim()) {
+      try {
+        await categoriesAPI.create({
+          name: providedName.trim(),
+          icon: '🏷️',
+          establishmentId: establishment.id,
+        });
+        toast.success('Categoria criada com sucesso!');
+        fetchStoreData(true);
+      } catch (err) {
+        toast.error('Erro ao criar categoria');
+        console.error(err);
+      }
+    } else {
+      setCategoryModal({ open: true, editingCat: null, name: '' });
     }
   };
 
-  const handleEditCategory = async (cat) => {
-    const newName = window.prompt('Novo nome da categoria:', cat.name);
-    if (!newName || newName.trim() === '' || newName === cat.name) return;
+  const handleEditCategory = (cat) => {
+    setCategoryModal({ open: true, editingCat: cat, name: cat.name });
+  };
+
+  const confirmSaveCategory = async (e) => {
+    e.preventDefault();
+    const { name, editingCat } = categoryModal;
+    if (!name || name.trim() === '') return;
+    setIsSaving(true);
     try {
-      await categoriesAPI.update(cat.id, { name: newName.trim() });
-      toast.success('Categoria atualizada!');
+      if (editingCat) {
+        await categoriesAPI.update(editingCat.id, { name: name.trim() });
+        toast.success('Categoria atualizada!');
+      } else {
+        await categoriesAPI.create({
+          name: name.trim(),
+          icon: '🏷️',
+          establishmentId: establishment.id,
+        });
+        toast.success('Categoria criada com sucesso!');
+      }
+      setCategoryModal({ open: false, editingCat: null, name: '' });
       fetchStoreData(true);
     } catch (err) {
-      toast.error('Erro ao atualizar categoria');
+      toast.error('Erro ao salvar categoria');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   // Excluir categoria
-  const handleDeleteCategory = async (cat) => {
-    if (!window.confirm(`Excluir a categoria "${cat.name}"? Essa ação removerá todos os produtos associados.`)) return;
+  const handleDeleteCategory = (cat) => {
+    setCatToDelete(cat);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!catToDelete) return;
     try {
-      await categoriesAPI.delete(cat.id);
+      await categoriesAPI.delete(catToDelete.id);
       toast.success('Categoria excluída!');
-      // Se a categoria deletada estava ativa, limpar seleção
-      if (activeCategory === cat.id) setActiveCategory(null);
+      if (activeCategory === catToDelete.id) setActiveCategory(null);
       fetchStoreData(true);
     } catch (err) {
       toast.error('Erro ao excluir categoria');
+    } finally {
+      setCatToDelete(null);
     }
   };
 
@@ -1118,6 +1134,66 @@ export default function StorePage() {
           </div>
         </div>
       )}
+      {/* Modais de Categoria */}
+      {categoryModal.open && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h2>{categoryModal.editingCat ? 'Editar Categoria' : 'Nova Categoria'}</h2>
+              <button className="close-modal" onClick={() => setCategoryModal({ open: false, editingCat: null, name: '' })}>
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={confirmSaveCategory} className="admin-form" style={{ marginTop: '20px' }}>
+              <div className="form-group">
+                <label>Nome da Categoria</label>
+                <input 
+                  type="text" 
+                  value={categoryModal.name} 
+                  onChange={e => setCategoryModal({ ...categoryModal, name: e.target.value })} 
+                  placeholder="Ex: Lanches, Bebidas"
+                  autoFocus
+                  required
+                />
+              </div>
+              <button type="submit" className="btn-submit" disabled={isSaving || !categoryModal.name.trim()}>
+                {isSaving ? 'Salvando...' : 'Salvar Categoria'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {catToDelete && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
+            <div style={{ marginBottom: '20px', color: '#FF6584' }}>
+              <Trash2 size={48} />
+            </div>
+            <h3 style={{ marginBottom: '12px' }}>Excluir Categoria?</h3>
+            <p style={{ color: '#94A3B8', marginBottom: '24px', lineHeight: '1.5' }}>
+              Tem certeza que deseja excluir a categoria <strong>{catToDelete.name}</strong>? Essa ação removerá também os produtos dentro dela.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button 
+                onClick={() => setCatToDelete(null)} 
+                className="btn-secondary" 
+                style={{ flex: 1 }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmDeleteCategory} 
+                className="btn-submit" 
+                style={{ flex: 1, background: '#FF6584' }}
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
